@@ -3,7 +3,7 @@
 var/list/whitelist = list()
 
 /hook/startup/proc/loadWhitelist()
-	if(config.usewhitelist)
+	if(CONFIG_GET(flag/usewhitelist)) // CHOMPEdit
 		load_whitelist()
 	return 1
 
@@ -12,7 +12,7 @@ var/list/whitelist = list()
 	if(!whitelist.len)	whitelist = null
 
 /proc/check_whitelist(mob/M /*, var/rank*/)
-	if(!config.usewhitelist) //CHOMPedit: I guess this is an override for the blanket whitelist system.
+	if(!CONFIG_GET(flag/usewhitelist)) //CHOMPedit: I guess this is an override for the blanket whitelist system.
 		return 1 //CHOMPedit
 	if(!whitelist)
 		return 0
@@ -21,7 +21,7 @@ var/list/whitelist = list()
 /var/list/alien_whitelist = list()
 
 /hook/startup/proc/loadAlienWhitelist()
-	if(config.usealienwhitelist)
+	if(CONFIG_GET(flag/usealienwhitelist)) // CHOMPEdit
 		load_alienwhitelist()
 	return 1
 
@@ -113,7 +113,7 @@ var/list/whitelist = list()
 				return 1
 
 /proc/whitelist_overrides(mob/M)
-	if(!config.usealienwhitelist)
+	if(!CONFIG_GET(flag/usealienwhitelist)) // CHOMPEdit
 		return TRUE
 	if(check_rights(R_ADMIN|R_EVENT, 0, M))
 		return TRUE

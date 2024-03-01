@@ -281,7 +281,7 @@
 		. += injury_level
 	// VOREStation Edit Stop
 
-	. += config.animal_delay
+	. += CONFIG_GET(number/animal_delay) // CHOMPEdit
 
 	. += ..()
 

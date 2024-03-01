@@ -152,6 +152,10 @@
 		if(SS_SLEEPING)
 			state = SS_PAUSING
 
+// CHOMPEdit Start
+/// Called after the config has been loaded or reloaded.
+/datum/controller/subsystem/proc/OnConfigLoad()
+// CHOMPEdit End
 
 //used to initialize the subsystem AFTER the map has loaded
 /datum/controller/subsystem/Initialize(start_timeofday)
@@ -210,7 +214,7 @@
 	can_fire = FALSE
 	// Safely sleep in a loop until the subsystem is idle, (or its been un-suspended somehow)
 	while(can_fire <= 0 && state != SS_IDLE)
-		stoplag() // Safely sleep in a loop until 
+		stoplag() // Safely sleep in a loop until
 
 // Wakes a suspended subsystem.
 /datum/controller/subsystem/proc/wake()
