@@ -629,12 +629,12 @@
 	if(istype(owner))
 		var/mob/living/carbon/human/carbon_owner = owner
 		var/mob/living/simple_mob/shadekin/sm_owner = owner
-		if(istype(carbon_owner))
-			var/datum/species/shadekin/SK = carbon_owner.species
-			if(istype(SK))
-				SK.active_dark_maws ^= src
-		else if(istype(sm_owner))
-			sm_owner.active_dark_maws ^= src
+		//if(istype(carbon_owner))
+			//var/datum/species/shadekin/SK = carbon_owner.species
+			//if(istype(SK))
+				//SK.active_dark_maws ^= src
+		//else if(istype(sm_owner))
+			//sm_owner.active_dark_maws ^= src
 	return ..()
 
 /obj/effect/abstract/dark_maw/Crossed(O)
