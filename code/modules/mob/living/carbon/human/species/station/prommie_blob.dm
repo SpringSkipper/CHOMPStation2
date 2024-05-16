@@ -251,7 +251,7 @@
 /mob/living/simple_mob/slime/promethean/proc/prommie_blobform()
 	set name = "Toggle Blobform"
 	set desc = "Switch between amorphous and humanoid forms."
-	set category = "Abilities"
+	set category = "Abilities.Promethean" //CHOMPEdit
 	set hidden = FALSE
 
 	var/atom/movable/to_locate = src
@@ -269,7 +269,7 @@
 /mob/living/simple_mob/slime/promethean/proc/toggle_expand()
 	set name = "Toggle Width"
 	set desc = "Switch between smole and lorge."
-	set category = "Abilities"
+	set category = "Abilities.Promethean" //CHOMPEdit
 	set hidden = FALSE
 
 	if(stat || world.time < last_special)
@@ -289,7 +289,7 @@
 /mob/living/simple_mob/slime/promethean/proc/toggle_shine()
 	set name = "Toggle Shine"
 	set desc = "Shine on you crazy diamond."
-	set category = "Abilities"
+	set category = "Abilities.Promethean" //CHOMPEdit
 	set hidden = FALSE
 
 	if(stat || world.time < last_special)
@@ -309,7 +309,7 @@
 /mob/living/simple_mob/slime/promethean/proc/prommie_select_colour()
 
 	set name = "Select Body Colour"
-	set category = "Abilities"
+	set category = "Abilities.Promethean" //CHOMPEdit
 
 	if(stat || world.time < last_special)
 		return
@@ -428,7 +428,8 @@
 		blob.rad_glow = CLAMP(radiation,0,250)
 		set_light(0)
 		blob.set_light(max(1,min(5,radiation/15)), max(1,min(10,radiation/25)), blob.color)
-		blob.handle_light()
+	else
+		blob.set_light(0)
 	if(has_hat)
 		blob.hat = new_hat
 		new_hat.forceMove(src)

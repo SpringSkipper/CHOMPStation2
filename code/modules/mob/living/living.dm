@@ -100,7 +100,7 @@
 
 /mob/living/verb/succumb()
 	set name = "Succumb to death"
-	set category = "IC"
+	set category = "IC.Game" //CHOMPEdit
 	set desc = "Press this button if you are in crit and wish to die. Use this sparingly (ending a scene, no medical, etc.)"
 	var/confirm1 = tgui_alert(usr, "Pressing this button will kill you instantenously! Are you sure you wish to proceed?", "Confirm wish to succumb", list("No","Yes"))
 	var/confirm2 = "No"
@@ -123,6 +123,8 @@
 		set_stat(CONSCIOUS)
 	else
 		// CHOMPEdit Start: Pain/etc calculations, but more efficient:tm: - this should work for literally anything that applies to health. Far better than slapping emote("pain") everywhere like scream does.
+		if(health > getMaxHealth()) //Overhealth
+			health = getMaxHealth()
 		var/initialhealth = health // CHOMPEdit: Getting our health before this check
 		health = getMaxHealth() - getOxyLoss() - getToxLoss() - getFireLoss() - getBruteLoss() - getCloneLoss() - halloss
 		if(!((ishuman(src)) || (issilicon(src))) && src.can_pain_emote) // Only run this if we're non-human/non-silicon (bots and mechanical simplemobs should be allowed to make pain sounds) & can emote pain, bc humans + carbons already do this. human_damage doesn't call parent, but sanity is better here.
@@ -709,12 +711,12 @@
 	return
 
 
-/mob/living/proc/Examine_OOC()
+/mob/living/verb/Examine_OOC() //ChompEDIT - proc --> verb
 	set name = "Examine Meta-Info (OOC)"
-	set category = "OOC"
+	set category = "OOC.Game" //CHOMPEdit
 	set src in view()
 	//VOREStation Edit Start - Making it so SSD people have prefs with fallback to original style.
-	if(config.allow_Metadata)
+	if(CONFIG_GET(flag/allow_metadata)) // CHOMPEdit
 		if(ooc_notes)
 			ooc_notes_window(usr)
 //			to_chat(usr, "<span class='filter_notice'>[src]'s Metainfo:<br>[ooc_notes]</span>")
@@ -730,7 +732,7 @@
 
 /mob/living/verb/resist()
 	set name = "Resist"
-	set category = "IC"
+	set category = "IC.Game" //CHOMPEdit
 
 	if(!incapacitated(INCAPACITATION_KNOCKOUT) && (last_resist_time + RESIST_COOLDOWN < world.time))
 		last_resist_time = world.time
@@ -790,7 +792,7 @@
 
 /mob/living/verb/lay_down()
 	set name = "Rest"
-	set category = "IC"
+	set category = "IC.Game" //CHOMPEdit
 
 	resting = !resting
 	to_chat(src, "<span class='notice'>You are now [resting ? "resting" : "getting up"].</span>")
@@ -970,7 +972,7 @@
 
 	if(incapacitated(INCAPACITATION_KNOCKOUT) || incapacitated(INCAPACITATION_STUNNED)) // CHOMPAdd - Making sure we're in good condition to crawl
 		canmove = 0
-		drop_both_hands()
+		//drop_both_hands() CHOMPremove, purple stuns dont drop items, this makes space EVA less frustrating and slips/shoves are already coded to drop your stuff.
 	else
 		canmove = 1
 
@@ -1178,7 +1180,7 @@
 				add_attack_logs(src,M,"Thrown via grab to [end_T.x],[end_T.y],[end_T.z]")
 			if(ishuman(M))
 				var/mob/living/carbon/human/N = M
-				if((N.health + N.halloss) < config.health_threshold_crit || N.stat == DEAD)
+				if((N.health + N.halloss) < CONFIG_GET(number/health_threshold_crit) || N.stat == DEAD) // CHOMPEdit
 					N.adjustBruteLoss(rand(10,30))
 			src.drop_from_inventory(G)
 

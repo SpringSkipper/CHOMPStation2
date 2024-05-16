@@ -24,9 +24,9 @@
 		if("run")
 			if(drowsyness > 0)
 				. += 6
-			. += config.run_speed
+			. += CONFIG_GET(number/run_speed) // CHOMPEdit
 		if("walk")
-			. += config.walk_speed
+			. += CONFIG_GET(number/walk_speed) // CHOMPEdit
 
 /client/proc/client_dir(input, direction=-1)
 	return turn(input, direction*dir2angle(dir))
@@ -371,7 +371,7 @@
 	var/incorporeal_speed = 0.5
 
 /client/verb/set_incorporeal_speed()
-	set category = "OOC"
+	set category = "OOC.Game Settings" //CHOMPEdit
 	set name = "Set Incorporeal Speed"
 
 	var/input = tgui_input_number(usr, "Set an incorporeal movement delay between 0 (fastest) and 5 (slowest)", "Incorporeal movement speed", (0.5/world.tick_lag), 5, 0)

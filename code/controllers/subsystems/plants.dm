@@ -141,7 +141,8 @@ SUBSYSTEM_DEF(plants)
 			return
 
 /datum/controller/subsystem/plants/proc/add_plant(var/obj/effect/plant/plant)
-	processing |= plant
+	if(!QDELETED(plant)) //CHOMPEdit GC
+		processing |= plant //CHOMPEdit GC
 
 /datum/controller/subsystem/plants/proc/remove_plant(var/obj/effect/plant/plant)
 	processing -= plant
@@ -149,7 +150,7 @@ SUBSYSTEM_DEF(plants)
 
 // Debug for testing seed genes.
 /client/proc/show_plant_genes()
-	set category = "Debug"
+	set category = "Debug.Investigate" //CHOMPEdit
 	set name = "Show Plant Genes"
 	set desc = "Prints the round's plant gene masks."
 

@@ -192,7 +192,7 @@
 	if(update)	UpdateDamageIcon()
 
 /mob/living/carbon/human/proc/implant_loyalty(override = FALSE) // Won't override by default.
-	if(!config.use_loyalty_implants && !override) return // Nuh-uh.
+	if(!CONFIG_GET(flag/use_loyalty_implants) && !override) return // Nuh-uh. // CHOMPEdit
 
 	var/obj/item/weapon/implant/loyalty/L = new/obj/item/weapon/implant/loyalty(src)
 	if(L.handle_implant(src, BP_HEAD))
@@ -1298,7 +1298,7 @@
 		return 0
 
 /mob/living/carbon/human/proc/bloody_doodle()
-	set category = "IC"
+	set category = "IC.Game" //CHOMPEdit
 	set name = "Write in blood"
 	set desc = "Use blood on your hands to write a short message on the floor or a wall, murder mystery style."
 
@@ -1612,7 +1612,7 @@
 /mob/living/carbon/human/verb/pull_punches()
 	set name = "Pull Punches"
 	set desc = "Try not to hurt them."
-	set category = "IC"
+	set category = "IC.Game" //CHOMPEdit
 
 	if(stat) return
 	pulling_punches = !pulling_punches
@@ -1634,6 +1634,12 @@
 /mob/living/carbon/human/can_feel_pain(var/obj/item/organ/check_organ)
 	if(isSynthetic())
 		return 0
+	//RS ADD START
+	if(!digest_pain && (isbelly(src.loc) || istype(src.loc, /turf/simulated/floor/water/digestive_enzymes)))
+		var/obj/belly/b = src.loc
+		if(b.digest_mode == DM_DIGEST || b.digest_mode == DM_SELECT)
+			return FALSE
+	//RS ADD END
 	for(var/datum/modifier/M in modifiers)
 		if(M.pain_immunity == TRUE)
 			return 0
@@ -1732,7 +1738,7 @@
 	return ..()
 
 /mob/living/carbon/human/pull_damage()
-	if(((health - halloss) <= config.health_threshold_softcrit))
+	if(((health - halloss) <= CONFIG_GET(number/health_threshold_softcrit))) // CHOMPEdit
 		for(var/name in organs_by_name)
 			var/obj/item/organ/external/e = organs_by_name[name]
 			if(!e)

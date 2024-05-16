@@ -86,10 +86,7 @@ var/global/list/obj/item/device/pda/PDAs = list()
 		. += "The time [stationtime2text()] is displayed in the corner of the screen."
 
 /obj/item/device/pda/CtrlClick()
-	if(issilicon(usr))
-		return
-
-	if(can_use(usr))
+	if(can_use(usr) && !issilicon(usr))
 		remove_pen()
 		return
 	..()
@@ -146,7 +143,7 @@ var/global/list/obj/item/device/pda/PDAs = list()
 			model_name = "Thinktronic 5230 Personal Data Assistant"
 		if(2)
 			icon = 'icons/obj/pda_slim.dmi'
-			model_name = "Ward-Takahashi SlimFit™ Personal Data Assistant"
+			model_name = "Ward-Takahashi SlimFitâ„¢ Personal Data Assistant"
 		if(3)
 			icon = 'icons/obj/pda_old.dmi'
 			model_name = "Thinktronic 5120 Personal Data Assistant"
@@ -172,7 +169,7 @@ var/global/list/obj/item/device/pda/PDAs = list()
 			)
 		if(7)
 			icon = 'icons/obj/pda_slider.dmi'			//VOREStation edit
-			model_name = "Slider® Personal Data Assistant"
+			model_name = "SliderÂ® Personal Data Assistant"
 		if(8)
 			icon = 'icons/obj/pda_vintage.dmi'
 			model_name = "\[ERR:INVALID_MANUFACTURER_ID\] Personal Data Assistant"
@@ -181,8 +178,14 @@ var/global/list/obj/item/device/pda/PDAs = list()
 		else
 			icon = 'icons/obj/pda_old.dmi'
 			log_debug("Invalid switch for PDA, defaulting to old PDA icons. [pdachoice] chosen.")
-	add_overlay("pda-pen")
+	//add_overlay("pda-pen") //ChompEDIT no icon ops on New
 	start_program(find_program(/datum/data/pda/app/main_menu))
+
+//ChompEDIT START - move icon ops to initialize
+/obj/item/device/pda/Initialize()
+	. = ..()
+	add_overlay("pda-pen")
+//ChompEDIT END
 
 /obj/item/device/pda/proc/can_use(mob/user)
 	return (tgui_status(user, GLOB.tgui_inventory_state) == STATUS_INTERACTIVE)

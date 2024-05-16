@@ -29,6 +29,12 @@
 			return FALSE
 
 	return TRUE
+
+/// Returns the top (last) element from the list, does not remove it from the list. Stack functionality.
+/proc/peek(list/target_list)
+	var/list_length = length(target_list)
+	if(list_length != 0)
+		return target_list[list_length]
 //CHOMPEdit End
 
 //Returns a list in plain english as a string
@@ -201,6 +207,15 @@
 		while(null in list)
 			list -= null
 	return
+
+//CHOMPAdd Start, list clear with return value
+/**
+ * Removes any null entries from the list
+ * Returns TRUE if the list had nulls, FALSE otherwise
+**/
+/proc/list_clear_nulls(list/list_to_clear)
+	return (list_to_clear.RemoveAll(null) > 0)
+//CHOMPAdd End
 
 /*
  * Returns list containing all the entries from first list that are not present in second.

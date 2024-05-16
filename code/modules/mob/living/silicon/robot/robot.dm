@@ -66,6 +66,9 @@
 	var/sleeper_state = 0 // 0 for empty, 1 for normal, 2 for mediborg-healthy
 	var/scrubbing = FALSE //Floor cleaning enabled
 
+	// Subtype limited modules or admin restrictions
+	var/list/restrict_modules_to = list()
+
 	// Components are basically robot organs.
 	var/list/components = list()
 
@@ -117,6 +120,7 @@
 	)
 
 	var/has_recoloured = FALSE
+	var/vtec_active = FALSE
 
 /mob/living/silicon/robot/New(loc, var/unfinished = 0)
 	spark_system = new /datum/effect/effect/system/spark_spread()
@@ -327,22 +331,27 @@
 	var/list/modules = list()
 	//VOREStatation Edit Start: shell restrictions //CHOMPstaton change to blacklist
 	if(shell)
-		modules.Add(robot_module_types)
-		modules.Remove(GLOB.shell_module_blacklist) // CHOMPEdit - Managed Globals
-		//CHOMPedit Add
-		if(crisis || security_level == SEC_LEVEL_RED || crisis_override)
-			to_chat(src, span_red("Crisis mode active. Combat module available."))
-			modules+="Combat"
-			modules+="ERT"
+		if(restrict_modules_to.len > 0)
+			modules.Add(restrict_modules_to)
+		else
+			modules.Add(robot_module_types)
+			modules.Remove(GLOB.shell_module_blacklist) // CHOMPEdit - Managed Globals
+			//CHOMPedit Add
+			if(crisis || security_level == SEC_LEVEL_RED || crisis_override)
+				to_chat(src, span_red("Crisis mode active. Combat module available."))
+				modules |= emergency_module_types
 			//CHOMPedit end
 	else
-		modules.Add(robot_module_types)
-		if(crisis || security_level == SEC_LEVEL_RED || crisis_override)
-			to_chat(src, span_red("Crisis mode active. Combat module available."))
-			modules |= emergency_module_types
-		for(var/module_name in whitelisted_module_types)
-			if(is_borg_whitelisted(src, module_name))
-				modules |= module_name
+		if(restrict_modules_to.len > 0)
+			modules.Add(restrict_modules_to)
+		else
+			modules.Add(robot_module_types)
+			if(crisis || security_level == SEC_LEVEL_RED || crisis_override)
+				to_chat(src, span_red("Crisis mode active. Combat module available."))
+				modules |= emergency_module_types
+			for(var/module_name in whitelisted_module_types)
+				if(is_borg_whitelisted(src, module_name))
+					modules |= module_name
 	//VOREStatation Edit End: shell restrictions
 	modtype = tgui_input_list(usr, "Please, select a module!", "Robot module", modules)
 
@@ -419,7 +428,7 @@
 
 /mob/living/silicon/robot/verb/namepick()
 	set name = "Pick Name"
-	set category = "Abilities.Silicon" //ChompEDIT - TGPanel
+	set category = "Abilities.Settings" //ChompEDIT - TGPanel
 
 	if(custom_name)
 		to_chat(usr, "You can't pick another custom name. Go ask for a name change.")
@@ -437,7 +446,7 @@
 
 /mob/living/silicon/robot/verb/extra_customization()
 	set name = "Customize Appearance"
-	set category = "Abilities.Silicon" //ChompEDIT - TGPanel
+	set category = "Abilities.Settings" //ChompEDIT - TGPanel
 	set desc = "Customize your appearance (assuming your chosen sprite allows)."
 
 	if(!sprite_datum || !sprite_datum.has_extra_customization)
@@ -540,13 +549,10 @@
 // function to toggle VTEC once installed
 /mob/living/silicon/robot/proc/toggle_vtec()
 	set name = "Toggle VTEC"
-	set category = "Abilities"
-	if(speed == -1)
-		to_chat(src, "<span class='filter_notice'>VTEC module disabled.</span>")
-		speed = 0
-	else
-		to_chat(src, "<span class='filter_notice'>VTEC module enabled.</span>")
-		speed = -1
+	set category = "Abilities.Silicon" //CHOMPEdit
+	vtec_active = !vtec_active
+	hud_used.toggle_vtec_control()
+	to_chat(src, "<span class='filter_notice'>VTEC module [vtec_active  ? "enabled" : "disabled"].</span>")
 
 // update the status screen display
 /mob/living/silicon/robot/get_status_tab_items()
@@ -845,7 +851,7 @@
 
 /mob/living/silicon/robot/proc/ColorMate()
 	set name = "Recolour Module"
-	set category = "Abilities.Silicon" //ChompEDIT - TGPanel
+	set category = "Abilities.Settings" //ChompEDIT - TGPanel
 	set desc = "Allows to recolour once."
 
 	if(!has_recoloured)
@@ -964,6 +970,8 @@
 		return
 
 	cut_overlays()
+	if(typing) //CHOMPAdd, needed as we don't have priority overlays anymore
+		add_overlay(typing_indicator, TRUE) //CHOMPAdd, needed as we don't have priority overlays anymore
 
 	icon			= sprite_datum.sprite_icon
 	icon_state		= sprite_datum.sprite_icon_state
@@ -1313,6 +1321,8 @@
 	icon_selected = 1
 	icon_selection_tries = 0
 	sprite_type = robot_species
+	if(hands)
+		update_hud()
 	to_chat(src, "<span class='filter_notice'>Your icon has been set. You now require a module reset to change it.</span>")
 
 /mob/living/silicon/robot/proc/set_default_module_icon()
@@ -1333,13 +1343,13 @@
 /mob/living/silicon/robot/proc/add_robot_verbs()
 	add_verb(src,robot_verbs_default) //CHOMPEdit TGPanel
 	add_verb(src,silicon_subsystems) //CHOMPEdit TGPanel
-	if(config.allow_robot_recolor)
+	if(CONFIG_GET(flag/allow_robot_recolor)) // CHOMPEdit
 		add_verb(src,/mob/living/silicon/robot/proc/ColorMate) //CHOMPEdit TGPanel
 
 /mob/living/silicon/robot/proc/remove_robot_verbs()
 	remove_verb(src,robot_verbs_default)  //CHOMPEdit
 	remove_verb(src,silicon_subsystems)  //CHOMPEdit
-	if(config.allow_robot_recolor)
+	if(CONFIG_GET(flag/allow_robot_recolor)) // CHOMPEdit
 		remove_verb(src,/mob/living/silicon/robot/proc/ColorMate ) //ChompEDIT - probable copypaste error //CHOMPEdit
 
 // Uses power from cyborg's cell. Returns 1 on success or 0 on failure.
@@ -1358,6 +1368,20 @@
 		used_power_this_tick += power_use
 		return 1
 	return 0
+
+// Function to directly drain power from the robot's cell, allows to set a minimum level beneath which
+// abilities can no longer be used
+/mob/living/silicon/robot/proc/use_direct_power(var/amount = 0, var/lower_limit = 0)
+	// No cell inserted
+	if(!cell)
+		return FALSE
+
+	// Power cell does not have sufficient charge to remain above the power limit.
+	if(cell.charge - (amount + lower_limit) <= 0)
+		return FALSE
+
+	cell.charge -= amount
+	return TRUE
 
 /mob/living/silicon/robot/binarycheck()
 	if(get_restraining_bolt())
@@ -1499,7 +1523,7 @@
 		G.drop_item_nm()
 
 /mob/living/silicon/robot/disable_spoiler_vision()
-	if(sight_mode & (BORGMESON|BORGMATERIAL|BORGXRAY)) // Whyyyyyyyy have seperate defines.
+	if(sight_mode & (BORGMESON|BORGMATERIAL|BORGXRAY|BORGANOMALOUS)) // Whyyyyyyyy have seperate defines.
 		var/i = 0
 		// Borg inventory code is very . . interesting and as such, unequiping a specific item requires jumping through some (for) loops.
 		var/current_selection_index = get_selected_module() // Will be 0 if nothing is selected.
@@ -1507,7 +1531,7 @@
 			i++
 			if(istype(thing, /obj/item/borg/sight))
 				var/obj/item/borg/sight/S = thing
-				if(S.sight_mode & (BORGMESON|BORGMATERIAL|BORGXRAY))
+				if(S.sight_mode & (BORGMESON|BORGMATERIAL|BORGXRAY|BORGANOMALOUS))
 					select_module(i)
 					uneq_active()
 
@@ -1524,7 +1548,7 @@
 /mob/living/silicon/robot/verb/rest_style()
 	set name = "Switch Rest Style"
 	set desc = "Select your resting pose."
-	set category = "IC"
+	set category = "IC.Settings" //CHOMPEdit
 
 	if(!sprite_datum || !sprite_datum.has_rest_sprites || sprite_datum.rest_sprite_options.len < 1)
 		to_chat(src, "<span class='notice'>Your current appearance doesn't have any resting styles!</span>")
@@ -1613,6 +1637,18 @@
 /mob/living/silicon/robot/proc/has_no_prod_upgrade(var/given_type)
 	if(given_type == /obj/item/borg/upgrade/no_prod/toygun)
 		return has_upgrade_module(/obj/item/weapon/gun/projectile/cyborgtoy)
+	if(given_type == /obj/item/borg/upgrade/no_prod/vision_xray)
+		return has_upgrade_module(/obj/item/borg/sight/xray)
+	if(given_type == /obj/item/borg/upgrade/no_prod/vision_thermal)
+		return has_upgrade_module(/obj/item/borg/sight/thermal)
+	if(given_type == /obj/item/borg/upgrade/no_prod/vision_meson)
+		return has_upgrade_module(/obj/item/borg/sight/meson)
+	if(given_type == /obj/item/borg/upgrade/no_prod/vision_material)
+		return has_upgrade_module(/obj/item/borg/sight/material)
+	/* //ChompEDIT START - disable for now
+	if(given_type == /obj/item/borg/upgrade/no_prod/vision_anomalous)
+		return has_upgrade_module(/obj/item/borg/sight/anomalous)
+	*/ //ChompEDIT END
 	return null
 
 /mob/living/silicon/robot/proc/has_upgrade(var/given_type)

@@ -30,6 +30,7 @@ export const VoreUserPreferences = (props) => {
     throw_vore,
     phase_vore,
     food_vore,
+    digest_pain,
     latejoin_vore,
     latejoin_prey,
     noisy,
@@ -40,6 +41,7 @@ export const VoreUserPreferences = (props) => {
     digest_leave_remains,
     pickup_mechanics_active,
     allow_spontaneous_tf,
+    allow_mind_transfer,
     eating_privacy_global,
     strip_mechanics_active,
     autotransferable,
@@ -261,6 +263,21 @@ export const VoreUserPreferences = (props) => {
         disabled: 'Food Vore Disabled',
       },
     },
+    toggle_digest_pain: {
+      action: 'toggle_digest_pain',
+      test: digest_pain,
+      tooltip: {
+        main:
+          'Allows for pain messages to show when being digested. ' +
+          ' Can be toggled off to disable pain messages.',
+        enable: 'Click here to allow for digestion pain.',
+        disable: 'Click here to disable digestion pain.',
+      },
+      content: {
+        enabled: 'Digestion Pain Enabled',
+        disabled: 'Digestion Pain Disabled',
+      },
+    },
     spawnbelly: {
       action: 'toggle_latejoin_vore',
       test: latejoin_vore,
@@ -409,6 +426,21 @@ export const VoreUserPreferences = (props) => {
       content: {
         enabled: 'Spontaneous TF Enabled',
         disabled: 'Spontaneous TF Disabled',
+      },
+    },
+    mind_transfer: {
+      action: 'toggle_allow_mind_transfer',
+      test: allow_mind_transfer,
+      tooltip: {
+        main:
+          'This toggle is for mind transfer interactions' +
+          ' as a victim, such as mind-binder or dominate pred/prey.',
+        enable: 'Click here to allow your mind being taken or swapped.',
+        disable: 'Click here to disallow having your mind taken or swapped.',
+      },
+      content: {
+        enabled: 'Mind Transfer Enabled',
+        disabled: 'Mind Transfer Disabled',
       },
     },
     examine_nutrition: {
@@ -663,9 +695,15 @@ export const VoreUserPreferences = (props) => {
               tooltipPosition="right"
             />
           </Flex.Item>
-          <Flex.Item basis="33%">
+          <Flex.Item basis="33%" grow={1}>
             <VoreUserPreferenceItem
               spec={preferences.spontaneous_tf}
+              tooltipPosition="top"
+            />
+          </Flex.Item>
+          <Flex.Item basis="33%">
+            <VoreUserPreferenceItem
+              spec={preferences.mind_transfer}
               tooltipPosition="top"
             />
           </Flex.Item>
@@ -742,6 +780,12 @@ export const VoreUserPreferences = (props) => {
               <VoreUserPreferenceItem
                 spec={preferences.remains}
                 tooltipPosition="left"
+              />
+            </Flex.Item>
+            <Flex.Item basis="33%">
+              <VoreUserPreferenceItem
+                spec={preferences.toggle_digest_pain}
+                tooltipPosition="right"
               />
             </Flex.Item>
           </Flex>

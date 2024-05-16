@@ -140,7 +140,7 @@
 
 	if(!breath || (breath.total_moles == 0))
 		H.failed_last_breath = 1
-		if(H.health > config.health_threshold_crit)
+		if(H.health > CONFIG_GET(number/health_threshold_crit)) // CHOMPEdit
 			H.adjustOxyLoss(ALRAUNE_MAX_OXYLOSS)
 		else
 			H.adjustOxyLoss(ALRAUNE_CRIT_MAX_OXYLOSS)
@@ -384,7 +384,7 @@
 /mob/living/carbon/human/proc/alraune_fruit_select() //So if someone doesn't want fruit/vegetables, they don't have to select one.
 	set name = "Select fruit"
 	set desc = "Select what fruit/vegetable you wish to grow."
-	set category = "Abilities"
+	set category = "Abilities.Alraune" //CHOMPEdit
 	var/obj/item/organ/internal/fruitgland/fruit_gland
 	for(var/F in contents)
 		if(istype(F, /obj/item/organ/internal/fruitgland))

@@ -196,7 +196,7 @@
 	return shock_damage
 
 /mob/living/carbon/proc/help_shake_act(mob/living/carbon/M)
-	if (src.health >= config.health_threshold_crit)
+	if (src.health >= CONFIG_GET(number/health_threshold_crit)) // CHOMPEdit
 		if(src == M && istype(src, /mob/living/carbon/human))
 			var/mob/living/carbon/human/H = src
 			var/datum/gender/T = gender_datums[H.get_visible_gender()]
@@ -397,7 +397,7 @@
 
 /mob/living/carbon/verb/mob_sleep()
 	set name = "Sleep"
-	set category = "IC"
+	set category = "IC.Game" //CHOMPEdit
 
 	if(usr.sleeping)
 		to_chat(usr, span_red("You are already sleeping"))
