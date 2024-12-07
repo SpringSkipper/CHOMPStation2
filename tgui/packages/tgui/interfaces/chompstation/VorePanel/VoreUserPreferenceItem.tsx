@@ -1,7 +1,12 @@
-import { useBackend } from '../../../backend';
-import { Button } from '../../../components';
+import { useBackend } from 'tgui/backend';
+import { Button } from 'tgui/components';
 
-export const VoreUserPreferenceItem = (props) => {
+import { preferenceData } from './types';
+
+export const VoreUserPreferenceItem = (props: {
+  spec: preferenceData;
+  [rest: string]: any;
+}) => {
   const { act } = useBackend();
 
   const { spec, ...rest } = props;
