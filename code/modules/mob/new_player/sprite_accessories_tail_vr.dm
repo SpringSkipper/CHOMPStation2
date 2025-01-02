@@ -6,14 +6,14 @@
 ////////////////////////////
 */
 /datum/sprite_accessory/tail
-	name = "You should not see this..."
+	name = DEVELOPER_WARNING_NAME
 	icon = 'icons/mob/vore/tails_vr.dmi'
 	var/offset_x = 0
 	var/offset_y = 0
 	var/mob_offset_x = 0
 	var/mob_offset_y = 0
 	do_colouration = 0 //Set to 1 to enable coloration using the tail color.
-	species_allowed = list(SPECIES_HUMAN, SPECIES_SKRELL, SPECIES_UNATHI, SPECIES_TAJ, SPECIES_TESHARI, SPECIES_NEVREAN, SPECIES_AKULA, SPECIES_SERGAL, SPECIES_FENNEC, SPECIES_ZORREN_HIGH, SPECIES_VULPKANIN, SPECIES_XENOCHIMERA, SPECIES_XENOHYBRID, SPECIES_VASILISSAN, SPECIES_RAPALA, SPECIES_PROTEAN, SPECIES_ALRAUNE, SPECIES_WEREBEAST, SPECIES_SHADEKIN, SPECIES_SHADEKIN_CREW, SPECIES_ALTEVIAN, SPECIES_LLEILL, SPECIES_HANNER) //This lets all races use
+	species_allowed = list(SPECIES_HUMAN, SPECIES_SKRELL, SPECIES_UNATHI, SPECIES_TAJARAN, SPECIES_TESHARI, SPECIES_NEVREAN, SPECIES_AKULA, SPECIES_SERGAL, SPECIES_FENNEC, SPECIES_ZORREN_HIGH, SPECIES_VULPKANIN, SPECIES_XENOCHIMERA, SPECIES_XENOHYBRID, SPECIES_VASILISSAN, SPECIES_RAPALA, SPECIES_PROTEAN, SPECIES_ALRAUNE, SPECIES_WEREBEAST, SPECIES_SHADEKIN, SPECIES_SHADEKIN_CREW, SPECIES_ALTEVIAN, SPECIES_LLEILL, SPECIES_HANNER) //This lets all races use
 
 	var/list/lower_layer_dirs = list(SOUTH)
 	var/icon_loaf = null
@@ -1449,7 +1449,7 @@
 
 //LONG TAILS ARE NOT TAUR BUTTS >:O
 /datum/sprite_accessory/tail/longtail
-	name = "You should not see this..."
+	name = DEVELOPER_WARNING_NAME
 	icon = 'icons/mob/vore/taurs_vr.dmi'
 	offset_x = -16
 	do_colouration = 1 // Yes color, using tail color
