@@ -31,7 +31,7 @@
 	else
 		forceMove(locate(1,1,1))
 	//CHOMPEdit End
-	flags |= ATOM_INITIALIZED // Explicitly don't use Initialize().  New players join super early and use New() //CHOMPEdit
+	flags |= ATOM_INITIALIZED // Explicitly don't use Initialize().  New players join super early and use New()
 
 
 /mob/new_player/Destroy()
@@ -112,7 +112,7 @@
 			output += "<p><b><a href='byond://?src=\ref[src];open_station_news=1'>Show [using_map.station_name] News<br>(NEW!)</A></b></p>" //ChompEDIT - fixed height
 
 	//ChompEDIT start: Show Changelog
-	if(client.prefs.lastchangelog == changelog_hash)
+	if(client?.prefs?.lastchangelog == changelog_hash)
 		output += "<p><a href='byond://?src=\ref[src];open_changelog=1'>Show Changelog</A><br><i>No Changes</i></p>"
 	else
 		output += "<p><b><a href='byond://?src=\ref[src];open_changelog=1'>Show Changelog</A><br>(NEW!)</b></p>"
