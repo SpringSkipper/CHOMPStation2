@@ -158,3 +158,6 @@
       had the code written for them.
 
       code; Gets the _ch and _vr files in sync'
+2025-02-09:
+  CHOMPStation2StaffMirrorBot:
+  - code_imp: moves organs from new to init
