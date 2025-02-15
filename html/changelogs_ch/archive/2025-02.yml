@@ -161,3 +161,6 @@
 2025-02-09:
   CHOMPStation2StaffMirrorBot:
   - code_imp: moves organs from new to init
+2025-02-15:
+  CHOMPStation2StaffMirrorBot:
+  - code_imp: moves the dependencies to 516.1655
