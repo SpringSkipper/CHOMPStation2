@@ -9,7 +9,13 @@ import { type BooleanLike, classes } from 'tgui-core/react';
 import { Channel, ChannelIterator } from './ChannelIterator';
 import { ChatHistory } from './ChatHistory';
 import { LineLength, RADIO_PREFIXES, WindowSize } from './constants';
-import { getPrefix, windowClose, windowOpen, windowSet } from './helpers';
+import {
+  getMarkupString,
+  getPrefix,
+  windowClose,
+  windowOpen,
+  windowSet,
+} from './helpers';
 import { byondMessages } from './timers';
 
 type ByondOpen = {
@@ -45,17 +51,18 @@ export function TguiSay() {
     keyof typeof RADIO_PREFIXES | null
   >(null);
   const [size, setSize] = useState(WindowSize.Small);
-  const [maxLength, setMaxLength] = useState(1024);
+  const [maxLength, setMaxLength] = useState(4096);
   const [minimumHeight, setMinimumHeight] = useState(WindowSize.Small);
   const [minimumWidth, setMinimumWidth] = useState(WindowSize.Width);
   const [lightMode, setLightMode] = useState(false);
+  const [position, setPosition] = useState([window.screenX, window.screenY]);
   const [value, setValue] = useState('');
 
-  function handleArrowKeys(direction: KEY.Up | KEY.Down): void {
+  function handleArrowKeys(direction: KEY.PageUp | KEY.PageDown): void {
     const chat = chatHistory.current;
     const iterator = channelIterator.current;
 
-    if (direction === KEY.Up) {
+    if (direction === KEY.PageUp) {
       if (chat.isAtLatest() && value) {
         // Save current message to temp history if at the most recent message
         chat.saveTemp(value);
@@ -110,14 +117,21 @@ export function TguiSay() {
     const iterator = channelIterator.current;
     const prefix = currentPrefix ?? '';
 
-    if (value?.length && value.length < maxLength) {
-      chatHistory.current.add(value);
-      Byond.sendMessage('entry', {
-        channel: iterator.current(),
-        entry: iterator.isSay() ? prefix + value : value,
-      });
+    if (value?.length) {
+      if (value.length < maxLength) {
+        chatHistory.current.add(value);
+        Byond.sendMessage('entry', {
+          channel: iterator.current(),
+          entry: iterator.isSay() ? prefix + value : value,
+        });
+      } else {
+        Byond.sendMessage('lenwarn', {
+          length: value.length,
+          maxlength: maxLength,
+        });
+        return;
+      }
     }
-
     handleClose();
   }
 
@@ -130,20 +144,39 @@ export function TguiSay() {
     const prefix = currentPrefix ?? '';
     const grunt = iterator.isSay() ? prefix + value : value;
 
-    messages.current.forceSayMsg(grunt, iterator.current());
+    messages.current.forceSayMsg(grunt);
     unloadChat();
   }
 
   function handleIncrementChannel(): void {
+    const xPos = window.screenX;
+    const yPos = window.screenY;
+    if (JSON.stringify(position) !== JSON.stringify([xPos, yPos])) return;
     const iterator = channelIterator.current;
 
     iterator.next();
     setButtonContent(iterator.current());
     setCurrentPrefix(null);
-    messages.current.channelIncrementMsg(iterator.isVisible());
+    messages.current.channelIncrementMsg(
+      iterator.isVisible(),
+      iterator.current(),
+    );
+  }
+
+  function handleDecrementChannel() {
+    const iterator = channelIterator.current;
+
+    iterator.prev();
+    setButtonContent(iterator.current());
+    setCurrentPrefix(null);
+    messages.current.channelIncrementMsg(
+      iterator.isVisible(),
+      iterator.current(),
+    );
   }
 
   function handleInput(event: FormEvent<HTMLTextAreaElement>): void {
+    const iterator = channelIterator.current;
     let newValue = event.currentTarget.value;
 
     let newPrefix = getPrefix(newValue) || currentPrefix;
@@ -152,6 +185,7 @@ export function TguiSay() {
       setButtonContent(RADIO_PREFIXES[newPrefix]);
       setCurrentPrefix(newPrefix);
       newValue = newValue.slice(3);
+      iterator.set('Say');
 
       if (newPrefix === ',b ') {
         Byond.sendMessage('thinking', { visible: false });
@@ -160,19 +194,10 @@ export function TguiSay() {
 
     // Handles typing indicators
     if (channelIterator.current.isVisible() && newPrefix !== ',b ') {
-      messages.current.typingMsg();
+      messages.current.typingMsg(iterator.current());
     }
 
     setValue(newValue);
-  }
-
-  function getMarkupString(
-    inputText: string,
-    markupType: string,
-    startPosition: number,
-    endPosition: number,
-  ) {
-    return `${inputText.substring(0, startPosition)}${markupType}${inputText.substring(startPosition, endPosition)}${markupType}${inputText.substring(endPosition)}`;
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>): void {
@@ -218,8 +243,8 @@ export function TguiSay() {
           event.currentTarget.selectionEnd = selectionEnd + 2;
         }
         break;
-      case KEY.Up:
-      case KEY.Down:
+      case KEY.PageUp:
+      case KEY.PageDown:
         event.preventDefault();
         handleArrowKeys(event.key);
         break;
@@ -230,12 +255,18 @@ export function TguiSay() {
         break;
 
       case KEY.Enter:
-        event.preventDefault();
-        handleEnter();
+        if (!event.shiftKey) {
+          event.preventDefault();
+          handleEnter();
+        }
         break;
 
       case KEY.Tab:
         event.preventDefault();
+        if (event.shiftKey) {
+          handleDecrementChannel();
+          break;
+        }
         handleIncrementChannel();
         break;
 
@@ -244,6 +275,13 @@ export function TguiSay() {
           handleClose();
         }
     }
+  }
+
+  function handleButtonDrag(e: React.MouseEvent<Element, MouseEvent>): void {
+    const xPos = window.screenX;
+    const yPos = window.screenY;
+    setPosition([xPos, yPos]);
+    dragStartHandler(e);
   }
 
   function handleOpen(data: ByondOpen): void {
@@ -326,7 +364,7 @@ export function TguiSay() {
         <button
           className={`button button-${theme}`}
           onClick={handleIncrementChannel}
-          onMouseDown={dragStartHandler}
+          onMouseDown={handleButtonDrag}
           type="button"
         >
           {buttonContent}

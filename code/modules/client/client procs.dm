@@ -216,7 +216,7 @@
 	//Helps prevent multiple files being uploaded at once. Or right after eachother.
 	var/time_to_wait = fileaccess_timer - world.time
 	if(time_to_wait > 0)
-		to_chat(src, "<font color='red'>Error: AllowUpload(): Spam prevention. Please wait [round(time_to_wait/10)] seconds.</font>")
+		to_chat(src, span_red("Error: AllowUpload(): Spam prevention. Please wait [round(time_to_wait/10)] seconds."))
 		return 0
 	fileaccess_timer = world.time + FTPDELAY	*/
 	return 1
@@ -333,13 +333,11 @@
 		void = new()
 	screen += void
 
-	// CHOMPAdd Start
-	if((prefs.lastchangelog != changelog_hash) && isnewplayer(src.mob)) //bolds the changelog button on the interface so we know there are updates.
+	if((prefs?.read_preference(/datum/preference/text/lastchangelog) != GLOB.changelog_hash) && isnewplayer(src.mob)) //bolds the changelog button on the interface so we know there are updates.
 		to_chat(src, span_info("You have unread updates in the changelog."))
 		winset(src, "rpane.changelog", "background-color=#eaeaea;font-style=bold")
 		if(CONFIG_GET(flag/aggressive_changelog))
 			src.changes()
-	// CHOMPAdd End
 
 	if(CONFIG_GET(flag/paranoia_logging))
 		var/alert = FALSE //VOREStation Edit start.
@@ -663,7 +661,7 @@
 		return TRUE
 
 /client/proc/disconnect_with_message(var/message = "You have been intentionally disconnected by the server.<br>This may be for security or administrative reasons.")
-	message = "<head><title>You Have Been Disconnected</title></head><body><hr><center><b>[message]</b></center><hr><br>If you feel this is in error, you can contact an administrator out-of-game (for example, on Discord).</body>"
+	message = "<head><title>You Have Been Disconnected</title></head><body><hr><center>" + span_bold("[message]") + "</center><hr><br>If you feel this is in error, you can contact an administrator out-of-game (for example, on Discord).</body>"
 	window_flash(src)
 	src << browse("<html>[message]</html>","window=dropmessage;size=480x360;can_close=1")
 	qdel(src)
