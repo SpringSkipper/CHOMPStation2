@@ -58,6 +58,7 @@
   Will:
   - bugfix: motion tracking ability now lets you properly motion track
   - qol: Motion tracker subsystem can be toggled off for hide and seek modes
+  - bugfix: Potentially fixes your organs exploding when you spawn in
   - bugfix: no more randomly invisible marker beacons
   Will, Diana, Kash.:
   - code_imp: There is now a unit test that will ENSURE every borg sprite from this
