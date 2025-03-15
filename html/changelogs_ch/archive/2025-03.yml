@@ -307,3 +307,14 @@
   tacoguy7765093:
   - maptweak: Removed pointless ladder in explo shelter.
   - maptweak: Soluna Nexus duplicate APCs removed.
+2025-03-15:
+  CHOMPStation2StaffMirrorBot:
+  - bugfix: Fixed a number of duplicate structures and cleanables on maps for the
+      map linter PR.
+  Cameron-The-Raven:
+  - rscadd: Riftwalkers will now be able to swap their sprite appearances on demand.
+      (This means you have much more riftwalker sprites to choose from!)
+  - rscadd: Riftwalkers now have two new LARGE sprites (brutola and ignia) which have
+      2 stomach sprites each
+  SpadesNeil:
+  - bugfix: Makes giant cave spiders no longer giant
