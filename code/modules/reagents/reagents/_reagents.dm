@@ -44,6 +44,9 @@
 	var/glass_desc = "It's a glass of... what, exactly?"
 	var/list/glass_special = null // null equivalent to list()
 
+	var/from_belly = FALSE
+	var/wiki_flag = 0 // Bitflags for secret/food/drink reagent sorting
+
 /datum/reagent/proc/remove_self(var/amount) // Shortcut
 	if(holder)
 		holder.remove_reagent(id, amount)
@@ -230,9 +233,9 @@
 
 // Called when a mob dies
 /datum/reagent/proc/on_mob_death(var/mob/M)
- 	return
+	return
 
- //on transfer to new container, return 1 to allow it to continue
+//on transfer to new container, return 1 to allow it to continue
 /datum/reagent/proc/on_transfer(var/volume)
 	return 1
 //YW edit end

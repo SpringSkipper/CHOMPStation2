@@ -2175,9 +2175,9 @@
 						[js_byjax]
 						[js_dropdowns]
 						function ticker() {
-						    setInterval(function(){
-						        window.location='byond://?src=\ref[src]&update_content=1';
-						    }, 1000);
+							setInterval(function(){
+								window.location='byond://?src=\ref[src]&update_content=1';
+							}, 1000);
 						}
 
 						window.onload = function() {
@@ -2199,7 +2199,7 @@
 						</div>
 						</body>
 						</html>
-					 "}
+					"}
 	return output
 
 
@@ -2328,14 +2328,14 @@
 		for(var/obj/item/mecha_parts/mecha_equipment/W in micro_weapon_equipment)
 			output += "Micro Weapon Module: [W.name] <a href='byond://?src=\ref[W];detach=1'>Detach</a><br>"
 	output += {"<b>Available hull slots:</b> [max_hull_equip-hull_equipment.len]<br>
-	 <b>Available weapon slots:</b> [max_weapon_equip-weapon_equipment.len]<br>
-	 <b>Available micro weapon slots:</b> [max_micro_weapon_equip-micro_weapon_equipment.len]<br>
-	 <b>Available utility slots:</b> [max_utility_equip-utility_equipment.len]<br>
-	 <b>Available micro utility slots:</b> [max_micro_utility_equip-micro_utility_equipment.len]<br>
-	 <b>Available universal slots:</b> [max_universal_equip-universal_equipment.len]<br>
-	 <b>Available special slots:</b> [max_special_equip-special_equipment.len]<br>
-	 </div></div>
-	 "} */ //CHOMPedit commented micromech stuff, because fuck this trash
+		<b>Available weapon slots:</b> [max_weapon_equip-weapon_equipment.len]<br>
+		<b>Available micro weapon slots:</b> [max_micro_weapon_equip-micro_weapon_equipment.len]<br>
+		<b>Available utility slots:</b> [max_utility_equip-utility_equipment.len]<br>
+		<b>Available micro utility slots:</b> [max_micro_utility_equip-micro_utility_equipment.len]<br>
+		<b>Available universal slots:</b> [max_universal_equip-universal_equipment.len]<br>
+		<b>Available special slots:</b> [max_special_equip-special_equipment.len]<br>
+		</div></div>
+	"} */ //CHOMPedit commented micromech stuff, because fuck this trash
 	return output
 
 /obj/mecha/proc/get_equipment_list() //outputs mecha equipment list in html
@@ -2853,8 +2853,8 @@
 						<a href='byond://?src=\ref[src];debug=1;clear_i_dam=[MECHA_INT_SHORT_CIRCUIT]'>MECHA_INT_SHORT_CIRCUIT</a><br />
 						<a href='byond://?src=\ref[src];debug=1;clear_i_dam=[MECHA_INT_TANK_BREACH]'>MECHA_INT_TANK_BREACH</a><br />
 						<a href='byond://?src=\ref[src];debug=1;clear_i_dam=[MECHA_INT_CONTROL_LOST]'>MECHA_INT_CONTROL_LOST</a><br />
- 					   </body>
-						</html>"}
+						</body>
+					</html>"}
 
 	occupant << browse(output, "window=ex_debug")
 	//src.health = initial(src.health)/2.2

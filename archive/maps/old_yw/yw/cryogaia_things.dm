@@ -8,7 +8,7 @@
 
 //Special map objects
 /obj/effect/landmark/map_data/borealis2
-    height = 3 //Height marker. Provides the map with knowledge of how many z levels connecting below.
+	height = 3 //Height marker. Provides the map with knowledge of how many z levels connecting below.
 
 
 /datum/turbolift
@@ -22,7 +22,7 @@
 /obj/item/blueprints
 	SPACE_OUTSIDE_TYPES = list(
 		/area/borealis2/outdoors/exterior,
-        /area/borealis2/outdoors/grounds
+		/area/borealis2/outdoors/grounds
 	)
 
 
@@ -204,10 +204,10 @@ var/global/list/latejoin_tram   = list()
 	name = "JoinLateTram"
 	delete_me = 1
 
-/obj/effect/landmark/tram/New()
+/obj/effect/landmark/tram/Initialize(mapload)
 	latejoin_tram += loc // Register this turf as tram latejoin.
 	latejoin += loc // Also register this turf as fallback latejoin, since we won't have any arrivals shuttle landmarks.
-	..()
+	. = ..()
 
 /datum/spawnpoint/tram
 	display_name = "Tram Station"
@@ -270,23 +270,23 @@ var/global/list/latejoin_tram   = list()
 	"Desert" 			= new/datum/holodeck_program(/area/houseboat/holodeck/desert,
 													list(
 														'sound/effects/weather/wind/wind_2_1.ogg',
-											 			'sound/effects/weather/wind/wind_2_2.ogg',
-											 			'sound/effects/weather/wind/wind_3_1.ogg',
-											 			'sound/effects/weather/wind/wind_4_1.ogg',
-											 			'sound/effects/weather/wind/wind_4_2.ogg',
-											 			'sound/effects/weather/wind/wind_5_1.ogg'
-												 		)
-		 											),
+														'sound/effects/weather/wind/wind_2_2.ogg',
+														'sound/effects/weather/wind/wind_3_1.ogg',
+														'sound/effects/weather/wind/wind_4_1.ogg',
+														'sound/effects/weather/wind/wind_4_2.ogg',
+														'sound/effects/weather/wind/wind_5_1.ogg'
+														)
+													),
 	"Snowfield" 		= new/datum/holodeck_program(/area/houseboat/holodeck/snow,
 													list(
 														'sound/effects/weather/wind/wind_2_1.ogg',
-											 			'sound/effects/weather/wind/wind_2_2.ogg',
-											 			'sound/effects/weather/wind/wind_3_1.ogg',
-											 			'sound/effects/weather/wind/wind_4_1.ogg',
-											 			'sound/effects/weather/wind/wind_4_2.ogg',
-											 			'sound/effects/weather/wind/wind_5_1.ogg'
-												 		)
-		 											),
+														'sound/effects/weather/wind/wind_2_2.ogg',
+														'sound/effects/weather/wind/wind_3_1.ogg',
+														'sound/effects/weather/wind/wind_4_1.ogg',
+														'sound/effects/weather/wind/wind_4_2.ogg',
+														'sound/effects/weather/wind/wind_5_1.ogg'
+														)
+													),
 	"Space" 			= new/datum/holodeck_program(/area/houseboat/holodeck/space,
 													list(
 														'sound/ambience/ambispace.ogg',

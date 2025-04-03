@@ -89,19 +89,19 @@
 /datum/surgery_step/robotics/insertion_preparation/begin_step(mob/user, mob/living/carbon/human/target, target_zone, obj/item/tool)
 	var/obj/item/organ/external/affected = target.get_organ(target_zone)
 	user.visible_message(span_filter_notice("[user] starts to modify the wiring in [target]'s [affected.name] with \the [tool]."),
-	span_filter_notice("You start to modify the wiring in [target]'s [affected.name] with \the [tool]."))
+		span_filter_notice("You start to modify the wiring in [target]'s [affected.name] with \the [tool]."))
 	..()
 
 /datum/surgery_step/robotics/insertion_preparation/end_step(mob/living/user, mob/living/carbon/human/target, target_zone, obj/item/tool)
 	var/obj/item/organ/external/affected = target.get_organ(target_zone)
 	user.visible_message(span_notice("[user] modifies the wiring in [target]'s [affected.name] with \the [tool]."), \
-	 span_notice("You modify the wiring in [target]'s [affected.name] with \the [tool]."))
+		span_notice("You modify the wiring in [target]'s [affected.name] with \the [tool]."))
 	affected.open = 2
 
 /datum/surgery_step/robotics/insertion_preparation/fail_step(mob/living/user, mob/living/carbon/human/target, target_zone, obj/item/tool)
 	var/obj/item/organ/external/affected = target.get_organ(target_zone)
 	user.visible_message(span_warning("[user]'s [tool.name] slips, failing to modify the wiring in [target]'s [affected.name]."),
-	span_warning("Your [tool] slips, failing to modify the wiring in [target]'s [affected.name]."))
+		span_warning("Your [tool] slips, failing to modify the wiring in [target]'s [affected.name]."))
 
 ///////////////////////////////////////////////////////////////
 // Open Hatch Surgery
@@ -127,21 +127,21 @@
 /datum/surgery_step/robotics/open_hatch/begin_step(mob/user, mob/living/carbon/human/target, target_zone, obj/item/tool)
 	var/obj/item/organ/external/affected = target.get_organ(target_zone)
 	user.visible_message(span_filter_notice("[user] starts to pry open the maintenance hatch on [target]'s [affected.name] with \the [tool]."),
-	span_filter_notice("You start to pry open the maintenance hatch on [target]'s [affected.name] with \the [tool]."))
+												span_filter_notice("You start to pry open the maintenance hatch on [target]'s [affected.name] with \the [tool]."))
 	user.balloon_alert_visible("starts to pry open the maintenance hatch on [target]'s [affected.name]", "prying open the maintenance hatch on \the [affected.name]") // CHOMPEdit
 	..()
 
 /datum/surgery_step/robotics/open_hatch/end_step(mob/living/user, mob/living/carbon/human/target, target_zone, obj/item/tool)
 	var/obj/item/organ/external/affected = target.get_organ(target_zone)
 	user.visible_message(span_notice("[user] opens the maintenance hatch on [target]'s [affected.name] with \the [tool]."), \
-	 span_notice("You open the maintenance hatch on [target]'s [affected.name] with \the [tool]."))
+										span_notice("You open the maintenance hatch on [target]'s [affected.name] with \the [tool]."))
 	user.balloon_alert_visible("opens the maintenance hatch on [target]'s [affected.name]", "maintenance hatch on \the [affected.name] open") // CHOMPEdit
 	affected.open = 3
 
 /datum/surgery_step/robotics/open_hatch/fail_step(mob/living/user, mob/living/carbon/human/target, target_zone, obj/item/tool)
 	var/obj/item/organ/external/affected = target.get_organ(target_zone)
 	user.visible_message(span_warning("[user]'s [tool.name] slips, failing to open the hatch on [target]'s [affected.name]."),
-	span_warning("Your [tool] slips, failing to open the hatch on [target]'s [affected.name]."))
+										span_warning("Your [tool] slips, failing to open the hatch on [target]'s [affected.name]."))
 	user.balloon_alert_visible("slips, failing to open the hatch on [target]'s [affected.name]", "your [tool] slips, fialing to open the hatch on \the [affected.name]") // CHOMPEdit
 
 ///////////////////////////////////////////////////////////////
@@ -201,17 +201,17 @@
 	max_duration = 60
 
 /datum/surgery_step/robotics/repair_brute/can_use(mob/living/user, mob/living/carbon/human/target, target_zone, obj/item/tool)
-    if(..()) //CHOMPEdit begin. Added damage check.
-        var/obj/item/organ/external/affected = target.get_organ(target_zone)
-        if(istype(tool, /obj/item/weldingtool))
-            var/obj/item/weldingtool/welder = tool
-            if(affected.brute_dam == 0)
-                to_chat(user, span_notice("There is no damage to the internal structure here!"))
-                return SURGERY_FAILURE
-            else
-                if(!welder.isOn() || !welder.remove_fuel(1,user))
-                    return 0
-        return affected && affected.open == 3 && (affected.disfigured || affected.brute_dam > 0) && target_zone != O_MOUTH // CHOMPEdit End.
+	if(..()) //CHOMPEdit begin. Added damage check.
+		var/obj/item/organ/external/affected = target.get_organ(target_zone)
+		if(istype(tool, /obj/item/weldingtool))
+			var/obj/item/weldingtool/welder = tool
+			if(affected.brute_dam == 0)
+				to_chat(user, span_notice("There is no damage to the internal structure here!"))
+				return SURGERY_FAILURE
+			else
+				if(!welder.isOn() || !welder.remove_fuel(1,user))
+					return 0
+		return affected && affected.open == 3 && (affected.disfigured || affected.brute_dam > 0) && target_zone != O_MOUTH // CHOMPEdit End.
 
 /datum/surgery_step/robotics/repair_brute/begin_step(mob/user, mob/living/carbon/human/target, target_zone, obj/item/tool)
 	var/obj/item/organ/external/affected = target.get_organ(target_zone)
@@ -533,12 +533,12 @@
 		user.balloon_alert(user, "you cannot install a computer brain into a meat skull") // CHOMPEdit
 		return SURGERY_FAILURE
 
-	if(!target.should_have_organ("brain"))
+	if(!target.should_have_organ(O_BRAIN))
 		to_chat(user, span_danger("You're pretty sure [target.species.name_plural] don't normally have a brain."))
 		user.balloon_alert(user, "you're pertty sure [target.species.name_plural] don't normall have a brain") // CHOMPEdit
 		return SURGERY_FAILURE
 
-	if(!isnull(target.internal_organs["brain"]))
+	if(!isnull(target.internal_organs[O_BRAIN]))
 		to_chat(user, span_danger("Your subject already has a brain."))
 		user.balloon_alert(user, "your subject already has a brain") // CHOMPEdit
 		return SURGERY_FAILURE
@@ -571,8 +571,8 @@
 		holder = new /obj/item/organ/internal/mmi_holder/robot(target, 1, M)
 	else
 		holder = new /obj/item/organ/internal/mmi_holder(target, 1, M) // Fallback to old behavior if organic MMI or if no subtype exists.
-    //VOREstation edit end
-	target.internal_organs_by_name["brain"] = holder
+	//VOREstation edit end
+	target.internal_organs_by_name[O_BRAIN] = holder
 
 	if(M.brainmob && M.brainmob.mind)
 		M.brainmob.mind.transfer_to(target)
@@ -640,12 +640,12 @@
 		user.balloon_alert(user, "you're fairly certain a nymph can't pilot a normal robot") // CHOMPEdit
 		return SURGERY_FAILURE
 
-	if(!target.should_have_organ("brain"))
+	if(!target.should_have_organ(O_BRAIN))
 		to_chat(user, span_danger("You're pretty sure [target.species.name_plural] don't normally have a brain."))
 		user.balloon_alert(user, "you're pretty sure [target.species.name_plural] don't normall have a brain") // CHOMPEdit
 		return SURGERY_FAILURE
 
-	if(!isnull(target.internal_organs["brain"]))
+	if(!isnull(target.internal_organs[O_BRAIN]))
 		to_chat(user, span_danger("Your subject already has a cephalon."))
 		user.balloon_alert(user, "your subject already has a cephalon") // CHOMPEdit
 		return SURGERY_FAILURE
@@ -667,7 +667,7 @@
 
 	var/obj/item/holder/diona/N = tool
 	var/obj/item/organ/internal/brain/cephalon/cephalon = new(target, 1)
-	target.internal_organs_by_name["brain"] = cephalon
+	target.internal_organs_by_name[O_BRAIN] = cephalon
 	var/mob/living/carbon/alien/diona/D = N.held_mob
 	user.drop_from_inventory(tool)
 

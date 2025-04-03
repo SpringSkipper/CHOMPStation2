@@ -21,10 +21,10 @@
 	pickup_sound = 'sound/items/pickup/device.ogg'
 	drop_sound = 'sound/items/drop/device.ogg'
 
-/obj/item/healthanalyzer/New()
+/obj/item/healthanalyzer/Initialize(mapload)
+	. = ..()
 	if(advscan >= 1)
 		verbs += /obj/item/healthanalyzer/proc/toggle_adv
-	..()
 
 /obj/item/healthanalyzer/examine(mob/user)
 	. = ..()
@@ -304,7 +304,7 @@
 					dat += "<br>"
 			else if(istype(io,/obj/item/organ/internal/malignant))
 				if(advscan >= 2)
-					var/obj/item/organ/internal/ORG = H.organs_by_name[io.parent_organ]
+					var/obj/item/organ/external/ORG = H.organs_by_name[io.parent_organ]
 					dat += span_warning("Anatomical irregularities detected in subject's [ORG.name].")
 					dat += "<br>"
 				else
