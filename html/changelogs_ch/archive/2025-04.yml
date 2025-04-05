@@ -21,3 +21,7 @@
   - bugfix: Proteans can select icon base again
   - code_imp: tgui core to 1.8.4
   - rscdel: vchat
+2025-04-05:
+  FluffMedic:
+  - rscadd: New tyr layout, WIP due to active edge issues
+  - qol: stargazer eclipse space boss glows in a large area
