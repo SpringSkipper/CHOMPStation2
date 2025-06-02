@@ -1321,15 +1321,6 @@
 	pixel_y = default_pixel_y
 	center_offset = species.center_offset
 
-	if(LAZYLEN(descriptors))
-		descriptors = null
-
-	if(LAZYLEN(species.descriptors))
-		descriptors = list()
-		for(var/desctype in species.descriptors)
-			var/datum/mob_descriptor/descriptor = species.descriptors[desctype]
-			descriptors[desctype] = descriptor.default_value
-
 	if(vessel)
 		initialize_vessel()
 
@@ -1872,3 +1863,17 @@
 
 /mob/living/carbon/human/get_digestion_efficiency_modifier()
 	return species.digestion_efficiency
+
+/mob/living/carbon/human/verb/hide_headset()
+	set name = "Show/Hide Headset"
+	set category = "IC.Settings"
+	set desc = "Toggle headset worn icon visibility."
+	hide_headset = !hide_headset
+	update_inv_ears()
+
+/mob/living/carbon/human/verb/hide_glasses()
+	set name = "Show/Hide Glasses"
+	set category = "IC.Settings"
+	set desc = "Toggle glasses worn icon visibility."
+	hide_glasses = !hide_glasses
+	update_inv_glasses()

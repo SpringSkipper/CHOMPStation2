@@ -62,7 +62,6 @@
 	var/max_age = 70
 
 	var/icodigi = 'icons/mob/human_races/r_digi.dmi'
-	var/digi_allowed = FALSE
 
 	// Language/culture vars.
 	var/default_language = LANGUAGE_GALCOM					// Default language is used when 'say' is used without modifiers.
@@ -303,8 +302,6 @@
 
 	var/pass_flags = 0
 
-	var/list/descriptors = list()
-
 	//This is used in character setup preview generation (prefences_setup.dm) and human mob
 	//rendering (update_icons.dm)
 	var/color_mult = 0
@@ -385,15 +382,6 @@
 		hud = new hud_type()
 	else
 		hud = new()
-
-	// Prep the descriptors for the species
-	if(LAZYLEN(descriptors))
-		var/list/descriptor_datums = list()
-		for(var/desctype in descriptors)
-			var/datum/mob_descriptor/descriptor = new desctype
-			descriptor.comparison_offset = descriptors[desctype]
-			descriptor_datums[descriptor.name] = descriptor
-		descriptors = descriptor_datums
 
 	//If the species has eyes, they are the default vision organ
 	if(!vision_organ && has_organ[O_EYES])
