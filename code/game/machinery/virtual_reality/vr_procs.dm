@@ -27,10 +27,10 @@
 	set desc = "Become a different creature"
 
 	var/tf = null
-	var/k = tgui_input_list(usr, "Please select a creature:", "Mob list", vr_mob_tf_options)
+	var/k = tgui_input_list(usr, "Please select a creature:", "Mob list", GLOB.vr_mob_tf_options)
 	if(!k)
 		return 0
-	tf = vr_mob_tf_options[k]
+	tf = GLOB.vr_mob_tf_options[k]
 
 	var/mob/living/new_form = transform_into_mob(tf, TRUE, TRUE)
 	if(isliving(new_form)) // Sanity check
@@ -78,7 +78,7 @@
 
 	var/S = null
 	var/list/vr_landmarks = list()
-	for(var/obj/effect/landmark/virtual_reality/sloc in landmarks_list)
+	for(var/obj/effect/landmark/virtual_reality/sloc in GLOB.landmarks_list)
 		vr_landmarks += sloc.name
 	if(!LAZYLEN(vr_landmarks))
 		to_chat(src, "There are no available spawn locations in virtual reality.")
@@ -86,7 +86,7 @@
 	S = tgui_input_list(usr, "Please select a location to spawn your avatar at:", "Spawn location", vr_landmarks)
 	if(!S)
 		return 0
-	for(var/obj/effect/landmark/virtual_reality/i in landmarks_list)
+	for(var/obj/effect/landmark/virtual_reality/i in GLOB.landmarks_list)
 		if(i.name == S)
 			S = i
 			break
@@ -105,6 +105,8 @@
 		if(chosen_language)
 			if(is_lang_whitelisted(usr,chosen_language) || (avatar.species && (chosen_language.name in avatar.species.secondary_langs)))
 				avatar.add_language(lang)
+
+	SEND_SIGNAL(avatar, COMSIG_HUMAN_DNA_FINALIZED)
 
 	avatar.regenerate_icons()
 	avatar.update_transform()

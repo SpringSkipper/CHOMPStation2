@@ -33,6 +33,8 @@ export const VorePanelEditTextTabs = (props: {
   disableLegacyInput?: boolean;
   /** The action of a possibly supplied button shown above all inputs */
   button_action?: string;
+  /** The sub action of a possibly supplied button shown above all inputs */
+  button_subAction?: string;
   /** The action of a possibly supplied button shown above all inputs */
   button_label?: string;
   /** The data of the button to show its possible selected state */
@@ -61,6 +63,7 @@ export const VorePanelEditTextTabs = (props: {
     maxEntries = 10,
     disableLegacyInput,
     button_action,
+    button_subAction,
     button_label,
     button_data,
     button_tooltip,
@@ -81,7 +84,7 @@ export const VorePanelEditTextTabs = (props: {
                   act(tabAction, { tab: value });
                 }
               }}
-              icon={tabsToIcons && tabsToIcons[value]}
+              icon={tabsToIcons?.[value]}
             >
               {value}
             </Tabs.Tab>
@@ -93,13 +96,11 @@ export const VorePanelEditTextTabs = (props: {
           <LabeledList>
             <LabeledList.Item label={button_label}>
               <VorePanelEditSwitch
-                action="set_attribute"
-                subAction={button_action}
+                action={button_action}
+                subAction={button_subAction}
                 editMode={editMode}
                 active={!!button_data}
-                tooltip={
-                  (button_data ? 'Dis' : 'En') + 'ables ' + button_tooltip
-                }
+                tooltip={`${button_data ? 'Dis' : 'En'}ables ${button_tooltip}`}
               />
             </LabeledList.Item>
           </LabeledList>

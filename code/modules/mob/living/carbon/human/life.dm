@@ -1168,16 +1168,20 @@
 	if(status_flags & GODMODE)
 		return 0	//godmode
 
-	if(species.light_dam)
-		var/light_amount = 0
-		if(isturf(loc))
-			var/turf/T = loc
-			light_amount = T.get_lumcount() * 10
-		if(light_amount > species.light_dam) //if there's enough light, start dying
-			take_overall_damage(1,1)
-		else //heal in the dark
-			heal_overall_damage(1,1)
 	// nutrition decrease
+	// Species controls hunger rate for humans, otherwise use defaults
+	if(nutrition > 0 && stat != DEAD)
+		var/nutrition_reduction = DEFAULT_HUNGER_FACTOR
+		nutrition_reduction = species.hunger_factor
+		// Modifiers can increase or decrease nutrition cost
+		for(var/datum/modifier/mod in modifiers)
+			if(!isnull(mod.metabolism_percent))
+				nutrition_reduction *= mod.metabolism_percent
+		var/datum/component/nutrition_size_change/comp = GetComponent(/datum/component/nutrition_size_change)
+		if(comp)
+			nutrition_reduction *= comp.get_nutrition_multiplier()
+		adjust_nutrition(-nutrition_reduction)
+
 	if(noisy == TRUE && nutrition < 250 && prob(10))
 		var/sound/growlsound = sound(get_sfx("hunger_sounds"))
 		var/growlmultiplier = 100 - (nutrition / 250 * 100)
@@ -1803,14 +1807,19 @@
 			playsound_local(src,pick(GLOB.scarySounds),50, 1, -1)
 
 /mob/living/carbon/human/proc/handle_changeling()
-	if(mind && mind.changeling)
-		mind.changeling.regenerate()
+	var/datum/component/antag/changeling/comp = is_changeling(src)
+	if(!comp)
+		if(mind && hud_used)
+			ling_chem_display.invisibility = INVISIBILITY_ABSTRACT
+		return
+	else
+		comp.regenerate()
 		if(hud_used)
 			ling_chem_display.invisibility = INVISIBILITY_NONE
 //			ling_chem_display.maptext = "<div align='center' valign='middle' style='position:relative; top:0px; left:6px'><font color='#dd66dd'>[round(mind.changeling.chem_charges)]</font></div>"
-			switch(mind.changeling.chem_storage)
+			switch(comp.chem_storage)
 				if(1 to 50)
-					switch(mind.changeling.chem_charges)
+					switch(comp.chem_charges)
 						if(0 to 9)
 							ling_chem_display.icon_state = "ling_chems0"
 						if(10 to 19)
@@ -1824,7 +1833,7 @@
 						if(50)
 							ling_chem_display.icon_state = "ling_chems50"
 				if(51 to 80) //This is a crappy way of checking for engorged sacs...
-					switch(mind.changeling.chem_charges)
+					switch(comp.chem_charges)
 						if(0 to 9)
 							ling_chem_display.icon_state = "ling_chems0e"
 						if(10 to 19)
@@ -1843,9 +1852,6 @@
 							ling_chem_display.icon_state = "ling_chems70e"
 						if(80)
 							ling_chem_display.icon_state = "ling_chems80e"
-	else
-		if(mind && hud_used)
-			ling_chem_display.invisibility = INVISIBILITY_ABSTRACT
 
 /mob/living/carbon/human/handle_shock()
 	..()

@@ -44,7 +44,7 @@
 		if("message")
 			status_signal.data["msg1"] = data1
 			status_signal.data["msg2"] = data2
-			var/mob/user = pda.fingerprintslast
+			var/mob/user = pda.forensic_data?.get_lastprint()
 			if(isliving(pda.loc))
 				user = pda.loc
 			log_admin("STATUS: [user] set status screen with [pda]. Message: [data1] [data2]")
@@ -282,7 +282,7 @@
 			BucketData[++BucketData.len] = list ("x" = bl.x, "y" = bl.y, "dir" = uppertext(dir2text(direction)), "volume" = B.reagents.total_volume, "max_volume" = B.reagents.maximum_volume)
 
 	var/CbotData[0]
-	for(var/mob/living/bot/cleanbot/B in mob_list)
+	for(var/mob/living/bot/cleanbot/B in GLOB.mob_list)
 		var/turf/bl = get_turf(B)
 		if(bl)
 			if(bl.z != cl.z)

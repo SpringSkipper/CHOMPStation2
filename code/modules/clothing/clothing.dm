@@ -4,7 +4,6 @@
 	drop_sound = 'sound/items/drop/clothing.ogg'
 	pickup_sound = 'sound/items/pickup/clothing.ogg'
 	var/list/species_restricted = null //Only these species can wear this kit.
-	var/gunshot_residue //Used by forensics.
 
 	var/list/accessories
 	var/list/valid_accessory_slots
@@ -32,12 +31,6 @@
 /obj/item/clothing/proc/update_clothing_icon()
 	return
 
-// Aurora forensics port.
-/obj/item/clothing/clean_blood()
-	. = ..()
-	gunshot_residue = null
-
-
 /obj/item/clothing/Initialize(mapload)
 	. = ..()
 	if(starting_accessories)
@@ -53,7 +46,7 @@
 
 /obj/item/clothing/update_icon()
 	cut_overlays() //This removes all the overlays on the sprite and then goes down a checklist adding them as required.
-	if(blood_DNA)
+	if(forensic_data?.has_blooddna())
 		add_blood()
 	. = ..()
 
@@ -387,7 +380,7 @@
 		return
 */
 
-/obj/item/clothing/gloves/clean_blood()
+/obj/item/clothing/gloves/wash()
 	. = ..()
 	transfer_blood = 0
 	update_icon()
@@ -742,15 +735,15 @@
 	if(contaminated)
 		add_overlay(contamination_overlay)
 	if(gurgled) //VOREStation Edit Start
-		decontaminate()
+		wash(CLEAN_ALL)
 		gurgle_contaminate() //VOREStation Edit End
 	if(ismob(usr))
 		var/mob/M = usr
 		M.update_inv_shoes()
 
-/obj/item/clothing/shoes/clean_blood()
+/obj/item/clothing/shoes/wash()
+	. = ..()
 	update_icon()
-	return ..()
 
 // CHOMPEdit Begin - tweaking handle_movement for inshoes steppies
 /obj/item/clothing/shoes/proc/handle_movement(var/turf/walking, var/running, var/mob/living/carbon/human/pred)
@@ -910,9 +903,9 @@
 
 	return ..()
 
-/obj/item/clothing/suit/proc/taurize(var/mob/living/carbon/human/Taur, has_taur_tail = FALSE)
+/obj/item/clothing/suit/proc/taurize(var/mob/living/carbon/human/taur, has_taur_tail = FALSE)
 	if(has_taur_tail)
-		var/datum/sprite_accessory/tail/taur/taurtail = Taur.tail_style
+		var/datum/sprite_accessory/tail/taur/taurtail = taur.tail_style
 		if(taurtail.suit_sprites && (get_worn_icon_state(slot_wear_suit_str) in cached_icon_states(taurtail.suit_sprites)))
 			icon_override = taurtail.suit_sprites
 			taurized = TRUE

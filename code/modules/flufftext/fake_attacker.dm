@@ -112,7 +112,7 @@
 	if(!clone)
 		// Get a randomized clone from the living mob's list, must be standing
 		var/list/possible_clones = new/list()
-		for(var/mob/living/carbon/human/H in living_mob_list)
+		for(var/mob/living/carbon/human/H in GLOB.living_mob_list)
 			if(H.stat || H.lying)
 				continue
 			possible_clones += H
@@ -127,11 +127,13 @@
 		T = get_turf(clone)
 		var/turf/CT = T
 		for(var/i = 0 to 8)
+			if(!CT) // Emergency exit
+				return null
 			var/Cdir = pick(GLOB.cardinal)
 			if(prob(30))
 				Cdir = clone.dir // Results in hallucinations somewhat being in front of you
 			var/turf/NT = get_step(CT,Cdir)
-			if(!NT.density)
+			if(NT && !NT.density)
 				CT = NT
 		T = CT
 

@@ -13,7 +13,7 @@
 
 GLOBAL_LIST_EMPTY(active_buildmode_holders)
 
-/proc/togglebuildmode(mob/M as mob in player_list)
+/proc/togglebuildmode(mob/M as mob in GLOB.player_list)
 	set name = "Toggle Build Mode"
 	set category = "Special Verbs"
 	if(M.client)
@@ -292,7 +292,7 @@ GLOBAL_LIST_EMPTY(active_buildmode_holders)
 					if("number")
 						master.buildmode.valueholder = tgui_input_number(usr,"Enter variable value:" ,"Value", 123)
 					if("mob-reference")
-						master.buildmode.valueholder = tgui_input_list(usr,"Enter variable value:", "Value", mob_list)
+						master.buildmode.valueholder = tgui_input_list(usr,"Enter variable value:", "Value", GLOB.mob_list)
 					if("obj-reference")
 						master.buildmode.valueholder = tgui_input_list(usr,"Enter variable value:", "Value", world)
 					if("turf-reference")
@@ -583,7 +583,7 @@ CHOMP Remove end */
 						AI.wander = FALSE
 				if(pa.Find("alt") && isatom(object))
 					to_chat(user, span_notice("Adding [object] to Entity Narrate List!"))
-					user.client.add_mob_for_narration(object)
+					SSadmin_verbs.dynamic_invoke_verb(user.client, /datum/admin_verb/add_mob_for_narration, object)
 
 
 			if(pa.Find("right"))
@@ -707,7 +707,7 @@ CHOMP Remove end */
 			var/z = c1.z //Eh
 
 			var/i = 0
-			for(var/mob/living/L in living_mob_list)
+			for(var/mob/living/L in GLOB.living_mob_list)
 				if(L.z != z || L.client)
 					continue
 				if(L.x >= low_x && L.x <= hi_x && L.y >= low_y && L.y <= hi_y)
@@ -826,7 +826,7 @@ CHOMP Remove end */
 /proc/detect_room_buildmode(var/turf/first, var/allowedAreas = AREA_SPACE)
 	if(!istype(first))
 		return
-	var/list/turf/found = new
+	var/list/turf/found = list()
 	var/list/turf/pending = list(first)
 	while(pending.len)
 		var/turf/T = pending[1]
@@ -861,11 +861,11 @@ CHOMP Remove end */
 	if(A.outdoors)
 		return AREA_SPACE
 
-	for (var/type in BUILDABLE_AREA_TYPES)
+	for (var/type in GLOB.BUILDABLE_AREA_TYPES)
 		if ( istype(A,type) )
 			return AREA_SPACE
 
-	for (var/type in SPECIALS)
+	for (var/type in GLOB.SPECIALS)
 		if ( istype(A,type) )
 			return AREA_SPECIAL
 	return AREA_STATION

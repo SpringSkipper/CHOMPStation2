@@ -48,7 +48,7 @@ var/list/mob_hat_cache = list()
 	mob_push_flags = SIMPLE_ANIMAL
 	mob_always_swap = 1
 
-	mob_size = MOB_LARGE // Small mobs can't open doors, it's a huge pain for drones.
+	mob_size = MOB_SMALL
 
 	//Used for self-mailing.
 	var/mail_destination = ""
@@ -103,7 +103,7 @@ var/list/mob_hat_cache = list()
 	shell_accessories = list("eyes-miningdrone")
 
 /mob/living/silicon/robot/drone/Initialize(mapload, is_decoy)
-	. = ..(mapload, is_decoy, FALSE, TRUE)
+	. = ..(mapload, FALSE)
 	add_verb(src, /mob/living/proc/ventcrawl)
 	add_verb(src, /mob/living/proc/hide)
 	remove_language(LANGUAGE_ROBOT_TALK)
@@ -243,7 +243,7 @@ var/list/mob_hat_cache = list()
 
 			user.visible_message(span_danger("\The [user] swipes [TU.his] ID card through \the [src], attempting to reboot it."), span_danger(">You swipe your ID card through \the [src], attempting to reboot it."))
 			var/drones = 0
-			for(var/mob/living/silicon/robot/drone/D in player_list)
+			for(var/mob/living/silicon/robot/drone/D in GLOB.player_list)
 				drones++
 			if(drones < CONFIG_GET(number/max_maint_drones))
 				request_player()
@@ -287,14 +287,8 @@ var/list/mob_hat_cache = list()
 
 //DRONE LIFE/DEATH
 
-//For some goddamn reason robots have this hardcoded. Redefining it for our fragile friends here.
-/mob/living/silicon/robot/drone/updatehealth()
-	if(status_flags & GODMODE)
-		health = maxHealth
-		set_stat(CONSCIOUS)
-		return
-	health = maxHealth - (getBruteLoss() + getFireLoss())
-	return
+/mob/living/silicon/robot/drone/getMaxHealth()
+	return maxHealth
 
 //Easiest to check this here, then check again in the robot proc.
 //Standard robots use config for crit, which is somewhat excessive for these guys.
@@ -335,7 +329,7 @@ var/list/mob_hat_cache = list()
 //Reboot procs.
 
 /mob/living/silicon/robot/drone/proc/request_player()
-	for(var/mob/observer/dead/O in player_list)
+	for(var/mob/observer/dead/O in GLOB.player_list)
 		if(jobban_isbanned(O, JOB_CYBORG))
 			continue
 		if(O.client)

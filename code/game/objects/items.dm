@@ -138,7 +138,7 @@
 
 /obj/item/Destroy()
 	if(item_tf_spawn_allowed)
-		item_tf_spawnpoints -= src
+		GLOB.item_tf_spawnpoints -= src
 	if(ismob(loc))
 		var/mob/m = loc
 		m.drop_from_inventory(src)
@@ -398,6 +398,7 @@
 
 // called just as an item is picked up (loc is not yet changed)
 /obj/item/proc/pickup(mob/user)
+	SEND_SIGNAL(src, COMSIG_ITEM_PICKUP, user)
 	pixel_x = 0
 	pixel_y = 0
 	return
@@ -713,11 +714,6 @@ var/list/global/slot_flags_enumeration = list(
 	M.eye_blurry += rand(3,4)
 	return
 
-/obj/item/clean_blood()
-	. = ..()
-	if(blood_overlay)
-		overlays.Remove(blood_overlay)
-
 /obj/item/reveal_blood()
 	if(was_bloodied && !fluorescent)
 		fluorescent = 1
@@ -741,12 +737,9 @@ var/list/global/slot_flags_enumeration = list(
 	//Make the blood_overlay have the proper color then apply it.
 	blood_overlay.color = blood_color
 	add_overlay(blood_overlay)
-
-	//if this blood isn't already in the list, add it
 	if(istype(M))
-		if(blood_DNA[M.dna.unique_enzymes])
-			return 0 //already bloodied with this blood. Cannot add more.
-		blood_DNA[M.dna.unique_enzymes] = M.dna.b_type
+		add_blooddna(M.dna,M)
+
 	return 1 //we applied blood to the item
 
 GLOBAL_LIST_EMPTY(blood_overlays_by_type)
@@ -1032,6 +1025,8 @@ modules/mob/living/carbon/human/life.dm if you die, you will be zoomed out.
 
 /obj/item/MouseEntered(location,control,params)
 	. = ..()
+	if(QDELETED(src))
+		return
 	if(usr?.read_preference(/datum/preference/toggle/inv_tooltips) && ((src in usr) || isstorage(loc))) // If in inventory or in storage we're looking at
 		var/user = usr
 		tip_timer = addtimer(CALLBACK(src, PROC_REF(openTip), location, control, params, user), 5, TIMER_STOPPABLE)
@@ -1128,12 +1123,12 @@ Note: This proc can be overwritten to allow for different types of auto-alignmen
 /obj/item/proc/item_tf_spawnpoint_set()
 	if(!item_tf_spawn_allowed)
 		item_tf_spawn_allowed = TRUE
-		item_tf_spawnpoints += src
+		GLOB.item_tf_spawnpoints += src
 
 /obj/item/proc/item_tf_spawnpoint_used()
 	if(item_tf_spawn_allowed)
 		item_tf_spawn_allowed = FALSE
-		item_tf_spawnpoints -= src
+		GLOB.item_tf_spawnpoints -= src
 
 // Ported from TG, used when dropping items on tables/closets.
 /obj/item/proc/do_drop_animation(atom/moving_from)
@@ -1171,3 +1166,10 @@ Note: This proc can be overwritten to allow for different types of auto-alignmen
 	transform = animation_matrix
 
 	animate(src, alpha = old_alpha, pixel_x = old_x, pixel_y = old_y, transform = old_transform, time = 3, easing = CUBIC_EASING)
+
+/obj/item/wash(clean_types)
+	. = ..()
+	if(cleanname)
+		name = cleanname
+	if(cleandesc)
+		desc = cleandesc

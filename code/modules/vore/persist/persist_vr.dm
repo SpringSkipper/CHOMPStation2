@@ -15,7 +15,7 @@
 
 // Handle people leaving due to round ending.
 /hook/roundend/proc/persist_locations()
-	for(var/mob/living/carbon/human/Player in human_mob_list)
+	for(var/mob/living/carbon/human/Player in GLOB.human_mob_list)
 		if(!Player.mind || isnewplayer(Player))
 			continue // No mind we can do nothing, new players we care not for
 		else if(Player.stat == DEAD)
@@ -129,7 +129,7 @@
 	prefs.s_tone	= character.s_tone
 	prefs.h_style	= character.h_style
 	prefs.f_style	= character.f_style
-	prefs.b_type	= character.b_type
+	prefs.b_type	= character.dna ? character.dna.b_type : DEFAULT_BLOOD_TYPE
 
 // Saves mob's current custom species, ears, tail, wings and digitigrade legs state to prefs
 // This basically needs to be the reverse of /datum/category_item/player_setup_item/vore/ears/copy_to_mob() ~Leshana
@@ -169,7 +169,10 @@
 	for(var/name in character.species.has_limbs)
 		var/obj/item/organ/external/O = character.organs_by_name[name]
 		if(!O)
-			prefs.organ_data[name] = "amputated"
+			if(name in GLOB.storable_amputated_organs)
+				prefs.organ_data[name] = "amputated"
+			else
+				prefs.rlimb_data.Remove(name) // Missing limb and not in the global list means default model
 		else if(O.robotic >= ORGAN_ROBOT)
 			prefs.organ_data[name] = "cyborg"
 			if(O.model)
@@ -226,6 +229,7 @@
 * without invoking the need for a bunch of different save file variables.
 */
 /proc/persist_nif_data(mob/living/carbon/human/H)
+	SIGNAL_HANDLER
 	if(!istype(H))
 		stack_trace("Persist (NIF): Given a nonhuman: [H]")
 		return

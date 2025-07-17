@@ -120,12 +120,13 @@
 	var/m_intent = I_RUN//Living
 	var/lastKnownIP = null
 	var/obj/buckled = null//Living
+	var/no_pull_when_living = FALSE //Test for if it can be pulled when alive
 
 	var/seer = 0 //for cult//Carbon, probably Human
 
 	var/datum/hud/hud_used = null
 
-	var/list/grabbed_by = list(  )
+	var/list/grabbed_by = list()
 
 	var/list/mapobjs = list()
 

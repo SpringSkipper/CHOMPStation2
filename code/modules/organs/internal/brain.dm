@@ -216,6 +216,9 @@ GLOBAL_LIST_BOILERPLATE(all_brain_organs, /obj/item/organ/internal/brain)
 	..()
 
 /obj/item/organ/internal/brain/slime/proc/reviveBody()
+	// TODO - Reference how xenochimera component handles revival from bodyrecord in the future.
+	// This requires a promie/protean component for transformation and regeneration.
+	// This shouldn't use a brain mob for caching dna. That's what BRs are for.
 	var/datum/dna2/record/R = new /datum/dna2/record()
 	qdel_swap(R.dna, brainmob.dna.Clone())
 	R.ckey = brainmob.ckey
@@ -240,7 +243,7 @@ GLOBAL_LIST_BOILERPLATE(all_brain_organs, /obj/item/organ/internal/brain)
 		if(ckey(clonemind.key) != R.ckey)
 			return 0
 	else
-		for(var/mob/observer/dead/G in player_list)
+		for(var/mob/observer/dead/G in GLOB.player_list)
 			if(G.ckey == R.ckey)
 				if(G.can_reenter_corpse)
 					break
@@ -293,8 +296,10 @@ GLOBAL_LIST_BOILERPLATE(all_brain_organs, /obj/item/organ/internal/brain)
 	for(var/datum/language/L in R.languages)
 		H.add_language(L.name)
 	H.flavor_texts = R.flavor.Copy()
-	qdel(R.dna)
-	qdel(R)
+
+	SEND_SIGNAL(H, COMSIG_HUMAN_DNA_FINALIZED)
+
+	qdel(R) // Record already deletes dna
 	qdel(src)
 	return 1
 

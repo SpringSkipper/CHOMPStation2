@@ -73,7 +73,7 @@ export const VoreSelectedBellyInteractions = (props: {
                       action="set_attribute"
                       subAction="b_digestchance"
                       editMode={editMode}
-                      value={interacts.escapechance}
+                      value={interacts.digestchance}
                       minValue={0}
                       maxValue={100}
                       unit="%"
@@ -197,7 +197,7 @@ export const VoreSelectedBellyInteractions = (props: {
               action="set_attribute"
               subAction="b_autotransfer_enabled"
               editMode={editMode}
-              active={!!escapable}
+              active={!!autotransfer_enabled}
               tooltip={
                 'Allows you to setup auto transfer options for this belly. So that prey is automatically moved depending on a timer or content count.'
               }

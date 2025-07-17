@@ -23,6 +23,11 @@
 		return FALSE
 	return TRUE
 
+/mob/proc/isInfective()
+	if(isemptylist(GetSpreadableViruses()))
+		return FALSE
+	return TRUE
+
 /mob/proc/CanContractDisease(datum/disease/D)
 	if(stat == DEAD && !global_flag_check(D.virus_modifiers, SPREAD_DEAD))
 		return FALSE
@@ -188,6 +193,14 @@
 		viruses_to_return += D
 	return viruses_to_return
 
+/mob/proc/GetDormantDiseases()
+	LAZYINITLIST(viruses)
+	var/list/viruses_to_return = list()
+	for(var/datum/disease/D in viruses)
+		if(D.virus_modifiers & DORMANT)
+			viruses_to_return += D
+	return viruses_to_return
+
 /mob/proc/GetResistances()
 	LAZYINITLIST(resistances)
 	return resistances
@@ -210,7 +223,7 @@
 	if(isnull(disease))
 		return FALSE
 
-	var/mob/living/carbon/human/H = tgui_input_list(usr, "Choose infectee", "Characters", human_mob_list)
+	var/mob/living/carbon/human/H = tgui_input_list(usr, "Choose infectee", "Characters", GLOB.human_mob_list)
 
 	if(isnull(H))
 		return FALSE

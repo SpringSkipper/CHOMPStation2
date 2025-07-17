@@ -22,7 +22,7 @@ var/list/preferences_datums = list()
 	//character preferences
 	var/real_name						//our character's name
 	var/nickname						//our character's nickname
-	var/b_type = "A+"					//blood type (not-chooseable)
+	var/b_type = DEFAULT_BLOOD_TYPE		//blood type (not-chooseable)
 	var/blood_reagents = "default"		//blood restoration reagents
 	var/headset = 1						//headset type
 	var/backbag = 2						//backpack type
@@ -121,9 +121,6 @@ var/list/preferences_datums = list()
 	var/lastnews // Hash of last seen lobby news content.
 	var/lastlorenews //ID of last seen lore news article.
 
-	var/examine_text_mode = 0 // Just examine text, include usage (description_info), switch to examine panel.
-	var/multilingual_mode = 0 // Default behaviour, delimiter-key-space, delimiter-key-delimiter, off
-
 	// THIS IS NOT SAVED
 	// WE JUST HAVE NOWHERE ELSE TO STORE IT
 	var/list/action_button_screen_locs
@@ -217,7 +214,7 @@ var/list/preferences_datums = list()
 	BG.icon_state = bgstate
 	BG.screen_loc = preview_screen_locs["BG"]
 
-	for(var/D in global.GLOB.cardinal)
+	for(var/D in GLOB.cardinal)
 		var/obj/screen/setup_preview/O = LAZYACCESS(char_render_holders, "[D]")
 		if(!O)
 			O = new
@@ -404,13 +401,14 @@ var/list/preferences_datums = list()
 
 	if(tgui_alert(user, "Are you sure you want to override slot [slotnum], [choice]'s savedata?", "Confirm Override", list("No", "Yes")) == "Yes")
 		overwrite_character(slotnum)
-		sanitize_preferences()
 		save_character()
 		save_preferences()
+		load_preferences(TRUE)
+		load_character()
 		attempt_vr(user.client?.prefs_vr,"load_vore","")
 		ShowChoices(user)
 
-/datum/preferences/proc/vanity_copy_to(var/mob/living/carbon/human/character, var/copy_name, var/copy_flavour = TRUE, var/copy_ooc_notes = FALSE, var/convert_to_prosthetics = FALSE)
+/datum/preferences/proc/vanity_copy_to(var/mob/living/carbon/human/character, var/copy_name, var/copy_flavour = TRUE, var/copy_ooc_notes = FALSE, var/convert_to_prosthetics = FALSE, var/apply_bloodtype = TRUE)
 	//snowflake copy_to, does not copy anything but the vanity things
 	//does not check if the name is the same, do that in any proc that calls this proc
 	/*
@@ -456,7 +454,8 @@ var/list/preferences_datums = list()
 	character.grad_style= grad_style
 	character.f_style	= f_style
 	character.grad_style= grad_style
-	character.b_type	= b_type
+	if(apply_bloodtype)
+		character.dna.b_type= b_type //This actually just straight up kills whoever uses it if the blood types aren't compatible in TF
 	character.synth_color = synth_color
 
 	var/datum/preference/color/synth_color_color = GLOB.preference_entries[/datum/preference/color/human/synth_color]
@@ -464,7 +463,7 @@ var/list/preferences_datums = list()
 
 	character.synth_markings = synth_markings
 
-	var/list/ear_styles = get_available_styles(global.ear_styles_list)
+	var/list/ear_styles = get_available_styles(GLOB.ear_styles_list)
 	character.ear_style =  ear_styles[ear_style]
 
 	var/datum/preference/color/ears_color1 = GLOB.preference_entries[/datum/preference/color/human/ears_color1]
@@ -479,7 +478,7 @@ var/list/preferences_datums = list()
 	character.ear_secondary_style = ear_styles[ear_secondary_style]
 	character.ear_secondary_colors = SANITIZE_LIST(ear_secondary_colors)
 
-	var/list/tail_styles = get_available_styles(global.tail_styles_list)
+	var/list/tail_styles = get_available_styles(GLOB.tail_styles_list)
 	character.tail_style = tail_styles[tail_style]
 
 	var/datum/preference/color/tail_color1 = GLOB.preference_entries[/datum/preference/color/human/tail_color1]
@@ -491,7 +490,7 @@ var/list/preferences_datums = list()
 	var/datum/preference/color/tail_color3 = GLOB.preference_entries[/datum/preference/color/human/tail_color3]
 	tail_color3.apply_pref_to(character, read_preference(/datum/preference/color/human/tail_color3))
 
-	var/list/wing_styles = get_available_styles(global.wing_styles_list)
+	var/list/wing_styles = get_available_styles(GLOB.wing_styles_list)
 	character.wing_style = wing_styles[wing_style]
 
 	var/datum/preference/color/wing_color1 = GLOB.preference_entries[/datum/preference/color/human/wing_color1]
@@ -505,6 +504,9 @@ var/list/preferences_datums = list()
 
 	var/datum/preference/numeric/wing_alpha = GLOB.preference_entries[/datum/preference/numeric/human/wing_alpha]
 	wing_alpha.apply_pref_to(character,read_preference(/datum/preference/numeric/human/wing_alpha))
+
+	var/datum/preference/numeric/skin_color = GLOB.preference_entries[/datum/preference/color/human/skin_color]
+	skin_color.apply_pref_to(character,read_preference(/datum/preference/color/human/skin_color))
 
 	character.set_gender(biological_gender)
 
@@ -530,7 +532,7 @@ var/list/preferences_datums = list()
 				else
 					var/bodytype
 					var/datum/species/selected_species = GLOB.all_species[species]
-					if(selected_species.selects_bodytype)
+					if(selected_species.selects_bodytype && custom_base) //Everyone technically has custom_base set to HUMAN, but only some species actually select it.
 						bodytype = custom_base
 					else
 						bodytype = selected_species.get_bodytype()
@@ -541,16 +543,18 @@ var/list/preferences_datums = list()
 
 	for(var/N in character.organs_by_name)
 		var/obj/item/organ/external/O = character.organs_by_name[N]
-		O.markings.Cut()
+		if(O)
+			O.markings.Cut()
 
 	var/priority = 0
 	for(var/M in body_markings)
 		priority += 1
-		var/datum/sprite_accessory/marking/mark_datum = body_marking_styles_list[M]
+		var/datum/sprite_accessory/marking/mark_datum = GLOB.body_marking_styles_list[M]
 
 		for(var/BP in mark_datum.body_parts)
 			var/obj/item/organ/external/O = character.organs_by_name[BP]
 			if(O)
+				if(!islist(body_markings[M][BP])) continue
 				O.markings[M] = list("color" = body_markings[M][BP]["color"], "datum" = mark_datum, "priority" = priority, "on" = body_markings[M][BP]["on"])
 	character.markings_len = priority
 
@@ -612,15 +616,16 @@ var/list/preferences_datums = list()
 
 	var/datum/species/selected_species = GLOB.all_species[species]
 	var/bodytype_selected
-	if(selected_species.selects_bodytype)
+	if(selected_species.selects_bodytype && custom_base)
 		bodytype_selected = custom_base
 	else
 		bodytype_selected = selected_species.get_bodytype(character)
-
 	character.dna.base_species = bodytype_selected
 	character.species.base_species = bodytype_selected
+	character.species.icobase = character.species.get_icobase()
+	character.species.deform = character.species.get_icobase(get_deform = TRUE)
 	character.species.vanity_base_fit = bodytype_selected
-	if (istype(character.species, /datum/species/shapeshifter))
+	if(istype(character.species, /datum/species/shapeshifter))
 		wrapped_species_by_ref["\ref[character]"] = bodytype_selected
 
 	character.custom_species	= custom_species

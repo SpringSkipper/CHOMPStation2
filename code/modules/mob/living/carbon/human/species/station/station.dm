@@ -40,6 +40,7 @@
 		O_KIDNEYS =		/obj/item/organ/internal/kidneys,
 		O_BRAIN =		/obj/item/organ/internal/brain,
 		O_APPENDIX = 	/obj/item/organ/internal/appendix,
+		O_SPLEEN =		/obj/item/organ/internal/spleen,
 		O_SPLEEN = 		/obj/item/organ/internal/spleen,
 		O_EYES =		/obj/item/organ/internal/eyes,
 		O_STOMACH =		/obj/item/organ/internal/stomach,
@@ -160,11 +161,12 @@
 
 	//No kidneys or appendix
 	has_organ = list(
-		O_HEART =    /obj/item/organ/internal/heart/unathi,
-		O_LUNGS =    /obj/item/organ/internal/lungs/unathi,
-		O_LIVER =    /obj/item/organ/internal/liver/unathi,
-		O_BRAIN =    /obj/item/organ/internal/brain/unathi,
-		O_EYES =     /obj/item/organ/internal/eyes/unathi,
+		O_HEART =		/obj/item/organ/internal/heart/unathi,
+		O_LUNGS =		/obj/item/organ/internal/lungs/unathi,
+		O_LIVER =		/obj/item/organ/internal/liver/unathi,
+		O_SPLEEN =		/obj/item/organ/internal/spleen,
+		O_BRAIN =		/obj/item/organ/internal/brain/unathi,
+		O_EYES =		/obj/item/organ/internal/eyes/unathi,
 		O_STOMACH =		/obj/item/organ/internal/stomach/unathi,
 		O_INTESTINE =	/obj/item/organ/internal/intestine/unathi
 		)
@@ -291,13 +293,14 @@
 	cold_discomfort_level = 215
 
 	has_organ = list(    //No appendix.
-		O_HEART =    /obj/item/organ/internal/heart/tajaran,
-		O_LUNGS =    /obj/item/organ/internal/lungs/tajaran,
-		O_VOICE = 		/obj/item/organ/internal/voicebox,
-		O_LIVER =    /obj/item/organ/internal/liver/tajaran,
-		O_KIDNEYS =  /obj/item/organ/internal/kidneys,
-		O_BRAIN =    /obj/item/organ/internal/brain,
-		O_EYES =     /obj/item/organ/internal/eyes/tajaran,
+		O_HEART =		/obj/item/organ/internal/heart/tajaran,
+		O_LUNGS =		/obj/item/organ/internal/lungs/tajaran,
+		O_VOICE =		/obj/item/organ/internal/voicebox,
+		O_LIVER =		/obj/item/organ/internal/liver/tajaran,
+		O_KIDNEYS =		/obj/item/organ/internal/kidneys,
+		O_SPLEEN =		/obj/item/organ/internal/spleen,
+		O_BRAIN =		/obj/item/organ/internal/brain,
+		O_EYES =		/obj/item/organ/internal/eyes/tajaran,
 		O_STOMACH =		/obj/item/organ/internal/stomach/tajaran,
 		O_INTESTINE =	/obj/item/organ/internal/intestine
 		)
@@ -490,6 +493,8 @@
 
 	reagent_tag = IS_ZADDAT
 
+	species_component = /datum/component/burninlight // Until a parent component like xenochimera have is needed, only handles burning in light.
+
 	heat_discomfort_strings = list(
 		"Your joints itch.",
 		"You feel uncomfortably warm.",
@@ -503,15 +508,16 @@
 		)
 
 	has_organ = list(    //No appendix.
-	O_HEART =    /obj/item/organ/internal/heart,
-	O_LUNGS =    /obj/item/organ/internal/lungs,
-	O_VOICE = 	 /obj/item/organ/internal/voicebox,
-	O_LIVER =    /obj/item/organ/internal/liver,
-	O_KIDNEYS =  /obj/item/organ/internal/kidneys,
-	O_BRAIN =    /obj/item/organ/internal/brain,
-	O_EYES =     /obj/item/organ/internal/eyes,
-	O_STOMACH =	 /obj/item/organ/internal/stomach,
-	O_INTESTINE =/obj/item/organ/internal/intestine
+	O_HEART =		/obj/item/organ/internal/heart,
+	O_LUNGS =		/obj/item/organ/internal/lungs,
+	O_VOICE =		/obj/item/organ/internal/voicebox,
+	O_LIVER =		/obj/item/organ/internal/liver,
+	O_KIDNEYS =		/obj/item/organ/internal/kidneys,
+	O_SPLEEN =		/obj/item/organ/internal/spleen,
+	O_BRAIN =		/obj/item/organ/internal/brain,
+	O_EYES =		/obj/item/organ/internal/eyes,
+	O_STOMACH =		/obj/item/organ/internal/stomach,
+	O_INTESTINE =	/obj/item/organ/internal/intestine
 	)
 
 
@@ -531,24 +537,6 @@
 
 	H.equip_to_slot_or_del(new /obj/item/clothing/mask/gas/zaddat/(H), slot_wear_mask) // mask has to come first or Shroud helmet will get in the way
 	H.equip_to_slot_or_del(new /obj/item/clothing/suit/space/void/zaddat/(H), slot_wear_suit)
-
-/datum/species/zaddat/handle_environment_special(var/mob/living/carbon/human/H)
-
-	if(H.inStasisNow())
-		return
-
-	var/damageable = H.get_damageable_organs()
-	var/covered = H.get_coverage()
-
-	var/light_amount = 0 //how much light there is in the place, affects damage
-	if(isturf(H.loc)) //else, there's considered to be no light
-		var/turf/T = H.loc
-		light_amount = T.get_lumcount() * 5
-
-
-	for(var/K in damageable)
-		if(!(K in covered))
-			H.apply_damage(light_amount/4, BURN, K, 0, 0)
 
 /datum/species/diona
 
@@ -722,6 +710,7 @@
 		//traumatic_shock is updated every tick, incrementing that is pointless - shock_stage is the counter.
 		//Not that it matters much for diona, who have NO_PAIN.
 		H.shock_stage++
+	..()
 
 
 
@@ -1192,13 +1181,14 @@
 		)
 
 	has_organ = list(
-		O_HEART =    /obj/item/organ/internal/heart,
-		O_LUNGS =    /obj/item/organ/internal/lungs,
-		O_VOICE = 	/obj/item/organ/internal/voicebox,
-		O_LIVER =    /obj/item/organ/internal/liver,
-		O_KIDNEYS =  /obj/item/organ/internal/kidneys,
-		O_BRAIN =    /obj/item/organ/internal/brain,
-		O_EYES =     /obj/item/organ/internal/eyes,
+		O_HEART =		/obj/item/organ/internal/heart,
+		O_LUNGS =		/obj/item/organ/internal/lungs,
+		O_VOICE =		/obj/item/organ/internal/voicebox,
+		O_LIVER =		/obj/item/organ/internal/liver,
+		O_KIDNEYS =		/obj/item/organ/internal/kidneys,
+		O_SPLEEN =		/obj/item/organ/internal/spleen,
+		O_BRAIN =		/obj/item/organ/internal/brain,
+		O_EYES =		/obj/item/organ/internal/eyes,
 		O_STOMACH =		/obj/item/organ/internal/stomach,
 		O_INTESTINE =	/obj/item/organ/internal/intestine
 		)
@@ -1361,6 +1351,7 @@
 		O_VOICE = 		/obj/item/organ/internal/voicebox,
 		O_LIVER =		/obj/item/organ/internal/liver,
 		O_KIDNEYS =		/obj/item/organ/internal/kidneys,
+		O_SPLEEN =		/obj/item/organ/internal/spleen,
 		O_BRAIN =		/obj/item/organ/internal/brain,
 		O_EYES =		/obj/item/organ/internal/eyes,
 		O_STOMACH =		/obj/item/organ/internal/stomach,
@@ -1590,7 +1581,7 @@
 			coldshock = 16
 			H.eye_blurry = 5
 		H.shock_stage = min(H.shock_stage + coldshock, 160) //cold hurts and gives them pain messages, eventually weakening and paralysing, but doesn't damage.
-		return
+	..()
 
 /datum/species/werebeast
 	name = SPECIES_WEREBEAST
@@ -1719,6 +1710,7 @@
 		O_VOICE =		/obj/item/organ/internal/voicebox,
 		O_LIVER =		/obj/item/organ/internal/liver,
 		O_KIDNEYS =		/obj/item/organ/internal/kidneys,
+		O_SPLEEN =		/obj/item/organ/internal/spleen,
 		O_BRAIN =		/obj/item/organ/internal/brain,
 		O_EYES =		/obj/item/organ/internal/eyes,
 		O_STOMACH =		/obj/item/organ/internal/stomach,
@@ -1752,6 +1744,7 @@
 	if(temp_diff >= 50)
 		H.shock_stage = min(H.shock_stage + (temp_diff/20), 160) // Divided by 20 is the same as previous numbers, but a full scale
 		H.eye_blurry = max(5,H.eye_blurry)
+	..()
 
 /datum/species/xenochimera/get_race_key()
 	var/datum/species/real = GLOB.all_species[base_species]

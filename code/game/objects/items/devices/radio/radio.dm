@@ -1,29 +1,4 @@
 #define CANBROADCAST_INNERBOX 0.7071067811865476	//This is sqrt(2)/2
-// Access check is of the type requires one. These have been carefully selected to avoid allowing the janitor to see channels he shouldn't
-var/global/list/default_internal_channels = list(
-	num2text(PUB_FREQ) = list(),
-	num2text(AI_FREQ)  = list(access_synth),
-	num2text(ENT_FREQ) = list(),
-	num2text(ERT_FREQ) = list(access_cent_specops),
-	num2text(COMM_FREQ)= list(access_heads),
-	num2text(ENG_FREQ) = list(access_engine_equip, access_atmospherics),
-	num2text(MED_FREQ) = list(access_medical_equip),
-	num2text(MED_I_FREQ)=list(access_medical_equip),
-	num2text(BDCM_FREQ) =list(access_security), // CHOMPEdit
-
-	num2text(SEC_FREQ) = list(access_security),
-	num2text(SEC_I_FREQ)=list(access_security),
-	num2text(SCI_FREQ) = list(access_tox, access_robotics, access_xenobiology),
-	num2text(SUP_FREQ) = list(access_cargo, access_mining_station),
-	num2text(SRV_FREQ) = list(access_janitor, access_library, access_hydroponics, access_bar, access_kitchen),
-	num2text(EXP_FREQ) = list(access_explorer, access_pilot) //CHOMP explo keep
-)
-
-var/global/list/default_medbay_channels = list(
-	num2text(PUB_FREQ) = list(),
-	num2text(MED_FREQ) = list(),
-	num2text(MED_I_FREQ) = list()
-)
 
 /obj/item/radio
 	icon = 'icons/obj/radio_vr.dmi'
@@ -67,7 +42,7 @@ var/global/list/default_medbay_channels = list(
 	var/list/internal_channels
 
 	var/datum/radio_frequency/radio_connection
-	var/list/datum/radio_frequency/secure_radio_connections = new
+	var/list/datum/radio_frequency/secure_radio_connections
 
 /obj/item/radio/proc/set_frequency(new_frequency)
 	radio_controller.remove_object(src, frequency)
@@ -76,6 +51,7 @@ var/global/list/default_medbay_channels = list(
 
 /obj/item/radio/Initialize(mapload)
 	. = ..()
+	secure_radio_connections = new
 	if(frequency < RADIO_LOW_FREQ || frequency > RADIO_HIGH_FREQ)
 		frequency = sanitize_frequency(frequency, RADIO_LOW_FREQ, RADIO_HIGH_FREQ)
 	set_frequency(frequency)
@@ -84,8 +60,8 @@ var/global/list/default_medbay_channels = list(
 		secure_radio_connections[ch_name] = radio_controller.add_object(src, radiochannels[ch_name],  RADIO_CHAT)
 
 	wires = new(src)
-	internal_channels = default_internal_channels.Copy()
-	listening_objects += src
+	internal_channels = GLOB.default_internal_channels.Copy()
+	GLOB.listening_objects += src
 
 	if(bluespace_radio && (bs_tx_preload_id || bs_rx_preload_id))
 		return INITIALIZE_HINT_LATELOAD
@@ -129,7 +105,7 @@ var/global/list/default_medbay_channels = list(
 /obj/item/radio/Destroy()
 	qdel(wires)
 	wires = null
-	listening_objects -= src
+	GLOB.listening_objects -= src
 	if(radio_controller)
 		radio_controller.remove_object(src, frequency)
 		for (var/ch_name in channels)
@@ -767,7 +743,7 @@ GLOBAL_DATUM(autospeaker, /mob/living/silicon/ai/announcer)
 
 /obj/item/radio/phone/medbay/Initialize(mapload)
 	. = ..()
-	internal_channels = default_medbay_channels.Copy()
+	internal_channels = GLOB.default_medbay_channels.Copy()
 
 /obj/item/radio/proc/can_broadcast_to()
 	var/list/output = list()

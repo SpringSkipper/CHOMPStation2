@@ -376,6 +376,10 @@ GLOBAL_LIST_EMPTY(damage_icon_parts) //see UpdateDamageIcon()
 	update_wing_showing()
 	update_vore_belly_sprite()
 	update_vore_tail_sprite()
+	if(species && species.component_requires_late_recalc)
+		var/datum/component/shadekin/SK = GetComponent(/datum/component/shadekin)
+		if(SK)
+			SK.recalc_values()
 
 /mob/living/carbon/human/proc/update_skin()
 	if(QDESTROYING(src))
@@ -394,13 +398,14 @@ GLOBAL_LIST_EMPTY(damage_icon_parts) //see UpdateDamageIcon()
 		return
 
 	remove_layer(BLOOD_LAYER)
-	if(!blood_DNA && !feet_blood_DNA)
+	var/bloody_mess = forensic_data?.get_blooddna()
+	if(!bloody_mess && !feet_blood_DNA)
 		return
 
 	var/image/both = image(icon = 'icons/effects/effects.dmi', icon_state = "nothing", layer = BODY_LAYER+BLOOD_LAYER)
 
 	//Bloody hands
-	if(blood_DNA)
+	if(bloody_mess)
 		var/image/bloodsies	= image(icon = species.get_blood_mask(src), icon_state = "bloodyhands", layer = BODY_LAYER+BLOOD_LAYER)
 		bloodsies.color = hand_blood_color
 		both.add_overlay(bloodsies)
@@ -455,7 +460,7 @@ GLOBAL_LIST_EMPTY(damage_icon_parts) //see UpdateDamageIcon()
 	var/icon/face_standing = icon(icon = 'icons/mob/human_face.dmi', icon_state = "bald_s")
 
 	if(f_style)
-		var/datum/sprite_accessory/facial_hair_style = facial_hair_styles_list[f_style]
+		var/datum/sprite_accessory/facial_hair_style = GLOB.facial_hair_styles_list[f_style]
 		if(facial_hair_style && facial_hair_style.species_allowed && (src.species.get_bodytype(src) in facial_hair_style.species_allowed))
 			var/icon/facial_s = new/icon("icon" = facial_hair_style.icon, "icon_state" = "[facial_hair_style.icon_state]_s")
 			if(facial_hair_style.do_colouration)
@@ -464,10 +469,10 @@ GLOBAL_LIST_EMPTY(damage_icon_parts) //see UpdateDamageIcon()
 			face_standing.Blend(facial_s, ICON_OVERLAY)
 
 	if(h_style)
-		var/datum/sprite_accessory/hair/hair_style = hair_styles_list[h_style]
+		var/datum/sprite_accessory/hair/hair_style = GLOB.hair_styles_list[h_style]
 		if(head && (head.flags_inv & BLOCKHEADHAIR))
 			if(!(hair_style.flags & HAIR_VERY_SHORT))
-				hair_style = hair_styles_list["Short Hair"]
+				hair_style = GLOB.hair_styles_list["Short Hair"]
 
 		if(hair_style && (src.species.get_bodytype(src) in hair_style.species_allowed))
 			var/icon/grad_s = null
@@ -865,7 +870,7 @@ GLOBAL_LIST_EMPTY(damage_icon_parts) //see UpdateDamageIcon()
 		suit_sprite = INV_SUIT_DEF_ICON
 
 	var/icon/c_mask = null
-	var/tail_is_rendered = (overlays_standing[TAIL_UPPER_LAYER] || overlays_standing[TAIL_UPPER_LAYER_ALT] || overlays_standing[TAIL_LOWER_LAYER])
+	var/tail_is_rendered = overlays_standing[TAIL_LOWER_LAYER] || overlays_standing[tail_alt]
 	var/valid_clip_mask = tail_style?.clip_mask
 
 	if(tail_is_rendered && valid_clip_mask && !(istype(suit) && suit.taurized)) //Clip the lower half of the suit off using the tail's clip mask for taurs since taur bodies aren't hidden.
@@ -998,14 +1003,15 @@ GLOBAL_LIST_EMPTY(damage_icon_parts) //see UpdateDamageIcon()
 		return
 
 	remove_layer(TAIL_UPPER_LAYER)
-	remove_layer(TAIL_UPPER_LAYER_ALT)
+	remove_layer(TAIL_UPPER_LAYER_HIGH)
+	remove_layer(TAIL_UPPER_LAYER_LOW)
 	remove_layer(TAIL_LOWER_LAYER)
 
 	var/tail_layer = get_tail_layer()
 	if(src.tail_style && src.tail_style.clip_mask_state)
 		tail_layer = TAIL_UPPER_LAYER		// Use default, let clip mask handle everything
-	if(tail_alt && tail_layer == TAIL_UPPER_LAYER)
-		tail_layer = TAIL_UPPER_LAYER_ALT
+	if(tail_layer == TAIL_UPPER_LAYER)
+		tail_layer = tail_alt
 
 	var/obj/item/organ/external/chest = organs_by_name[BP_TORSO]
 
@@ -1051,12 +1057,13 @@ GLOBAL_LIST_EMPTY(damage_icon_parts) //see UpdateDamageIcon()
 	var/tail_layer = get_tail_layer()
 	if(src.tail_style && src.tail_style.clip_mask_state)
 		tail_layer = TAIL_UPPER_LAYER		// Use default, let clip mask handle everything
-	if(tail_alt && tail_layer == TAIL_UPPER_LAYER)
-		tail_layer = TAIL_UPPER_LAYER_ALT
+	if(tail_layer == TAIL_UPPER_LAYER)
+		tail_layer = tail_alt
 	var/image/tail_overlay = overlays_standing[tail_layer]
 
 	remove_layer(TAIL_UPPER_LAYER)
-	remove_layer(TAIL_UPPER_LAYER_ALT)
+	remove_layer(TAIL_UPPER_LAYER_HIGH)
+	remove_layer(TAIL_UPPER_LAYER_LOW)
 	remove_layer(TAIL_LOWER_LAYER)
 
 	if(tail_overlay)
