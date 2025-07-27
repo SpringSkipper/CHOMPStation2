@@ -258,3 +258,7 @@
       of it's own separate proc. This is also round persistent as well.
   - code_imp: The shadekin component now has framework to have abilities added/removed
       from it at will.
+2025-07-27:
+  Diana:
+  - qol: Damage now updates immediately, instead of waiting for the next life tick.
+  - code_imp: Godmode works better now
