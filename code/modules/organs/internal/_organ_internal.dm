@@ -4,7 +4,12 @@
 /obj/item/organ/internal
 	var/dead_icon // Icon to use when the organ has died.
 
-	var/supply_conversion_value = 0 //CHOMPedit Selling Engineered Organs
+	var/supply_conversion_value = 0
+
+/obj/item/organ/internal/Initialize(mapload, internal)
+	. = ..()
+	if(supply_conversion_value)
+		AddElement(/datum/element/sellable/organ)
 
 /obj/item/organ/internal/die()
 	..()

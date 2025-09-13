@@ -31,9 +31,6 @@
 
 /obj/item/gun/energy/Initialize(mapload)
 	. = ..()
-	var/static/list/gun_icons = icon_states('icons/obj/gun_ch.dmi')
-	if (icon == 'icons/obj/gun_ch.dmi' && !(icon_state in gun_icons))
-		icon = 'icons/obj/gun.dmi'
 	if(self_recharge)
 		power_supply = new /obj/item/cell/device/weapon(src)
 		START_PROCESSING(SSobj, src)
@@ -138,7 +135,7 @@
 				to_chat(user, span_notice("[src] already has a power cell."))
 			else
 				user.visible_message("[user] is reloading [src].", span_notice("You start to insert [P] into [src]."))
-				if(do_after(user, reload_time * P.w_class))
+				if(do_after(user, reload_time * P.w_class, target = src))
 					user.remove_from_mob(P)
 					power_supply = P
 					P.loc = src

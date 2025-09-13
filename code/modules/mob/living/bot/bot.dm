@@ -170,7 +170,7 @@
 	else if(O.has_tool_quality(TOOL_CROWBAR))
 		if(open && paicard)
 			to_chat(user, span_notice("You are attempting to remove the pAI.."))
-			if(do_after(user,10 * O.toolspeed))
+			if(do_after(user, 1 SECOND * O.toolspeed, target = src))
 				ejectpai(user)
 	else
 		..()
@@ -444,6 +444,19 @@
 				L.Add(T)
 	return L
 
+// Diagonal-friendly version of CardinalTurfWithAccess
+/turf/proc/AdjacentTurfsWithAccess(obj/item/card/id/ID)
+	var/list/L = new()
+
+	for(var/dir_to_check in GLOB.alldirs) // Cardinals first.
+		var/turf/T = get_step(src, dir_to_check)
+		if(!T || !T.Adjacent(src))
+			continue
+		if(!LinkBlockedWithAccess(src, T, ID))
+			L.Add(T)
+
+
+	return L
 
 // Similar to above but not restricted to just GLOB.cardinal directions.
 /turf/proc/TurfsWithAccess(var/obj/item/card/id/ID)

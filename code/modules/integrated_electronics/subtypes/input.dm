@@ -6,6 +6,39 @@
 /obj/item/integrated_circuit/input/proc/ask_for_input(mob/user)
 	return
 
+/obj/item/integrated_circuit/input/reference_grabber // Allows grabbing non-adjacet refs, and their coords. (relative)
+	name = "reference grabber"
+	desc = "A handheld mechanism that can be aimed to attain distant references."
+	extended_desc = "When used, it will capture the reference of the target, and output coordinates relative to the user."
+	icon_state = "video_camera"
+	complexity = 4
+	inputs = list()
+	outputs = list(
+		"clicked ref" = IC_PINTYPE_REF,
+		"X" = IC_PINTYPE_NUMBER,
+		"Y" = IC_PINTYPE_NUMBER
+	)
+	activators = list(
+		"on success" = IC_PINTYPE_PULSE_OUT,
+		"on failure" = IC_PINTYPE_PULSE_OUT
+	)
+	spawn_flags = IC_SPAWN_DEFAULT|IC_SPAWN_RESEARCH
+
+/obj/item/integrated_circuit/input/reference_grabber/afterattack(atom/target, mob/user, proximity_flag, click_parameters)
+	if(!assembly || user.get_active_hand() != assembly)
+		activate_pin(2) // Failure pin, not in assembly, or not held.
+		return
+
+	if(!target || get_dist(user, target) > 7 || !(target in view(user)))
+		activate_pin(2) // Failure pin, out of range or not visible.
+		return
+
+	set_pin_data(IC_OUTPUT, 1, WEAKREF(target))
+	set_pin_data(IC_OUTPUT, 2, target.x - user.x)
+	set_pin_data(IC_OUTPUT, 3, target.y - user.y)
+	push_data()
+	activate_pin(1) // Success pin
+
 /obj/item/integrated_circuit/input/button
 	name = "button"
 	desc = "This tiny button must do something, right?"
@@ -16,8 +49,6 @@
 	outputs = list()
 	activators = list("on pressed" = IC_PINTYPE_PULSE_OUT)
 	spawn_flags = IC_SPAWN_DEFAULT|IC_SPAWN_RESEARCH
-
-
 
 /obj/item/integrated_circuit/input/button/ask_for_input(mob/user) //Bit misleading name for this specific use.
 	to_chat(user, span_notice("You press the button labeled '[src.displayed_name]'."))
@@ -72,8 +103,7 @@
 	power_draw_per_use = 4
 
 /obj/item/integrated_circuit/input/textpad/ask_for_input(mob/user)
-	var/new_input = tgui_input_text(user, "Enter some words, please.","Number pad", get_pin_data(IC_OUTPUT, 1),MAX_NAME_LEN, encode=FALSE)
-	new_input = sanitize(new_input,MAX_KEYPAD_INPUT_LEN) // Slightly increase the size of the character limit.
+	var/new_input = tgui_input_text(user, "Enter some words, please.", "Text pad", get_pin_data(IC_OUTPUT, 1), MAX_KEYPAD_INPUT_LEN)
 	if(istext(new_input) && CanInteract(user, GLOB.tgui_physical_state))
 		set_pin_data(IC_OUTPUT, 1, new_input)
 		push_data()
@@ -383,7 +413,7 @@
 	power_draw_idle = 5
 	power_draw_per_use = 40
 
-	var/frequency = 1457
+	var/frequency = RSD_FREQ
 	var/code = 30
 	var/datum/radio_frequency/radio_connection
 
@@ -394,9 +424,9 @@
 	addtimer(CALLBACK(src, PROC_REF(set_frequency), frequency), 40)
 
 /obj/item/integrated_circuit/input/signaler/Destroy()
-	if(radio_controller)
-		radio_controller.remove_object(src,frequency)
-	frequency = 0
+	if(SSradio)
+		SSradio.remove_object(src,frequency)
+	frequency = ZERO_FREQ
 	. = ..()
 
 /obj/item/integrated_circuit/input/signaler/on_data_written()
@@ -422,13 +452,13 @@
 /obj/item/integrated_circuit/input/signaler/proc/set_frequency(new_frequency)
 	if(!frequency)
 		return
-	if(!radio_controller)
+	if(!SSradio)
 		sleep(20)
-	if(!radio_controller)
+	if(!SSradio)
 		return
-	radio_controller.remove_object(src, frequency)
+	SSradio.remove_object(src, frequency)
 	frequency = new_frequency
-	radio_connection = radio_controller.add_object(src, frequency, RADIO_CHAT)
+	radio_connection = SSradio.add_object(src, frequency, RADIO_CHAT)
 
 /obj/item/integrated_circuit/input/signaler/receive_signal(datum/signal/signal)
 	var/new_code = get_pin_data(IC_INPUT, 2)
@@ -500,6 +530,12 @@
 	var/message = get_pin_data(IC_INPUT, 2)
 	var/text = get_pin_data(IC_INPUT, 3)
 
+	var/is_communicator = FALSE // improved communicator support
+	for(var/obj/item/communicator/comm in all_communicators)
+		if(comm.exonet && comm.exonet.address == target_address)
+			is_communicator = TRUE
+			break
+
 	if(target_address && istext(target_address))
 		if(!get_connection_to_tcomms())
 			set_pin_data(IC_OUTPUT, 1, null)
@@ -509,6 +545,9 @@
 			push_data()
 			activate_pin(2)
 		else
+			if(is_communicator)
+				text = message // For communicators, we need to set the text to the message.
+				message = "text"
 			exonet.send_message(target_address, message, text)
 
 /obj/item/integrated_circuit/input/receive_exonet_message(var/atom/origin_atom, var/origin_address, var/message, var/text)
@@ -775,7 +814,8 @@
 		"temperature" = IC_PINTYPE_NUMBER,
 		GAS_O2         = IC_PINTYPE_NUMBER,
 		GAS_N2          = IC_PINTYPE_NUMBER,
-		"carbon dioxide"           = IC_PINTYPE_NUMBER,
+		GAS_CO2           = IC_PINTYPE_NUMBER,
+		GAS_CH4           = IC_PINTYPE_NUMBER,
 		GAS_PHORON           = IC_PINTYPE_NUMBER,
 		"other"           = IC_PINTYPE_NUMBER
 	)
@@ -797,15 +837,17 @@
 		var/o2_level = environment.gas[GAS_O2]/total_moles
 		var/n2_level = environment.gas[GAS_N2]/total_moles
 		var/co2_level = environment.gas[GAS_CO2]/total_moles
+		var/methane_level = environment.gas[GAS_CH4]/total_moles
 		var/phoron_level = environment.gas[GAS_PHORON]/total_moles
-		var/unknown_level =  1-(o2_level+n2_level+co2_level+phoron_level)
+		var/unknown_level =  1-(o2_level+n2_level+co2_level+phoron_level+methane_level)
 		set_pin_data(IC_OUTPUT, 1, pressure)
 		set_pin_data(IC_OUTPUT, 2, round(environment.temperature-T0C,0.1))
 		set_pin_data(IC_OUTPUT, 3, round(o2_level*100,0.1))
 		set_pin_data(IC_OUTPUT, 4, round(n2_level*100,0.1))
 		set_pin_data(IC_OUTPUT, 5, round(co2_level*100,0.1))
 		set_pin_data(IC_OUTPUT, 6, round(phoron_level*100,0.01))
-		set_pin_data(IC_OUTPUT, 7, round(unknown_level, 0.01))
+		set_pin_data(IC_OUTPUT, 7, round(methane_level*100,0.01))
+		set_pin_data(IC_OUTPUT, 8, round(unknown_level, 0.01))
 	else
 		set_pin_data(IC_OUTPUT, 1, 0)
 		set_pin_data(IC_OUTPUT, 2, -273.15)
@@ -814,6 +856,7 @@
 		set_pin_data(IC_OUTPUT, 5, 0)
 		set_pin_data(IC_OUTPUT, 6, 0)
 		set_pin_data(IC_OUTPUT, 7, 0)
+		set_pin_data(IC_OUTPUT, 8, 0)
 	push_data()
 	activate_pin(2)
 
@@ -991,6 +1034,36 @@
 	if (total_moles)
 		var/phoron_level = environment.gas[GAS_PHORON]/total_moles
 		set_pin_data(IC_OUTPUT, 1, round(phoron_level*100,0.1))
+	else
+		set_pin_data(IC_OUTPUT, 1, 0)
+	push_data()
+	activate_pin(2)
+
+/obj/item/integrated_circuit/input/methane_sensor
+	name = "integrated methane sensor"
+	desc = "A tiny methane gas sensor module similar to that found in a PDA atmosphere analyser."
+	icon_state = "medscan_adv"
+	complexity = 3
+	inputs = list()
+	outputs = list(
+		GAS_CH4       = IC_PINTYPE_NUMBER
+	)
+	activators = list("scan" = IC_PINTYPE_PULSE_IN, "on scanned" = IC_PINTYPE_PULSE_OUT)
+	spawn_flags = IC_SPAWN_RESEARCH
+	origin_tech = list(TECH_ENGINEERING = 3, TECH_DATA = 3)
+	power_draw_per_use = 20
+
+/obj/item/integrated_circuit/input/methane_sensor/do_work()
+	var/turf/T = get_turf(src)
+	if(!istype(T)) //Invalid input
+		return
+	var/datum/gas_mixture/environment = T.return_air()
+
+	var/total_moles = environment.total_moles
+
+	if (total_moles)
+		var/methane_level = environment.gas[GAS_CH4]/total_moles
+		set_pin_data(IC_OUTPUT, 1, round(methane_level*100, 0.1))
 	else
 		set_pin_data(IC_OUTPUT, 1, 0)
 	push_data()
