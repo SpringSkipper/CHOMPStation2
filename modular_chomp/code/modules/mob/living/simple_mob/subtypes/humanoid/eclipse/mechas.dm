@@ -611,14 +611,23 @@
 
 /mob/living/simple_mob/mechanical/mecha/eclipse/tankyboss/chambera //poison boss
 	name = "experiment 20"
-	specialattackprojectile = /obj/item/projectile/energy/eclipse/poisonwind
 	icon_state = "poison_boss"
 	icon_living = "poison_boss"
+	wreckage = /obj/item/prop/tyrlore/basicflora
 
-/mob/living/simple_mob/mechanical/mecha/eclipse/tankyboss/chambera/apply_melee_effects(var/atom/A)
-	if(isliving(A))
-		var/mob/living/L = A
-		L.add_modifier(/datum/modifier/poisoned, 120 SECONDS)
+/mob/living/simple_mob/mechanical/mecha/eclipse/tankyboss/chamberc/bullet_act(obj/item/projectile/P)
+	if(istype(P,/obj/item/projectile/beam) || istype(P, /obj/item/projectile/energy))
+		nutrition += 5
+		if(size_multiplier > 1.95)
+			visible_message(span_boldwarning(span_orange("[P] heals the beast!.")))
+			adjustBruteLoss(-nutrition)
+			adjustFireLoss(-nutrition)
+			nutrition -= 5
+		else
+			size_multiplier += 0.05
+			..()
+	else
+		..()
 
 /mob/living/simple_mob/mechanical/mecha/eclipse/tankyboss/chambera/do_special_attack(atom/A)
 	var/rng_cycle = rand(1,6)
@@ -647,6 +656,7 @@
 	icon_state = "sonic_boss"
 	icon_living = "sonic_boss"
 	projectiletype = /obj/item/projectile/knockback/slow
+	wreckage = /obj/item/prop/tyrlore/basicsonic
 
 /obj/item/projectile/knockback/slow
 	speed = 10
@@ -680,6 +690,7 @@
 	icon_state = "UPshield_boss"
 	icon_living = "UPshield_boss"
 	projectiletype = /obj/item/projectile/energy/eclipse/tyrjavelin
+	wreckage = /obj/item/prop/tyrlore/basicshield
 	var/fullshield = 300
 	var/shieldrage = 3
 
@@ -729,6 +740,7 @@
 	specialattackprojectile = /obj/item/projectile/spawnball
 	icon_state = "spawn_boss"
 	icon_living = "spawn_boss"
+	wreckage = /obj/item/prop/tyrlore/drones
 
 /obj/item/projectile/spawnball
 	name = "nano sphere"
@@ -740,7 +752,7 @@
 	muzzle_type = null
 	combustion = FALSE
 
-/obj/item/projectile/metalball/on_hit(var/atom/target, var/blocked = 0)
+/obj/item/projectile/spawnball/on_hit(var/atom/target, var/blocked = 0)
 	if(isturf(target.loc))
 		visible_message(span_danger("\The [src] creates a hivebot!"))
 		new /mob/living/simple_mob/mechanical/hivebot/tyr(target.loc)
@@ -769,6 +781,8 @@
 	icon_living = "cyan"
 	size_multiplier = 3
 	projectiletype = /obj/item/projectile/arc/explosive_rocket
+	wreckage = /obj/item/prop/tyrlore/ants
+	specialattackprojectile = /obj/item/projectile/energy/eclipse/tyrjavelin
 	loot_list = list(/obj/item/projectile/energy/wp_shotgun  = 30,
 		/obj/item/gun/energy/energyballchain  = 30,
 		/obj/item/tool/wirecutters/hybrid/alien  = 30,
@@ -823,6 +837,7 @@
 	icon_state = "yellow"
 	icon_living = "yellow"
 	size_multiplier = 3
+	wreckage = /obj/item/prop/tyrlore/basicpower
 	specialattackprojectile = /obj/item/projectile/energy/lightingspark/nanoweave
 	projectiletype = /obj/item/projectile/energy/lightingspark/nanoweave
 	loot_list = list(/obj/item/projectile/energy/wp_shotgun  = 30,
@@ -874,12 +889,13 @@
 /mob/living/simple_mob/mechanical/mecha/eclipse/tankyboss/chamberg //wierd shields
 	name = "expirement 28"
 	specialattackprojectile = /obj/item/projectile/energy/eclipse/tyrjavelin
-	resistance = 15
+	resistance = 10
 	health = 1000
 	maxHealth = 1000
 	icon_state = "UPshield_boss"
 	icon_living = "UPshield_boss"
 	color = "#FF0000"
+	wreckage = /obj/item/prop/tyrlore/advanceshield
 	projectiletype = /obj/item/projectile/energy/eclipse/tyrjavelin
 
 /mob/living/simple_mob/mechanical/mecha/eclipse/tankyboss/chamberg/do_special_attack(atom/A)
@@ -920,3 +936,4 @@
 		projectiletype = /obj/item/projectile/energy/eclipse/tyrjavelin/speed
 		icon_state = "shield_boss"
 		icon_living = "shield_boss"
+	..()
