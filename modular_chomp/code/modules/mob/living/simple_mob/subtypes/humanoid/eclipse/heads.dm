@@ -53,10 +53,15 @@
 	armor_penetration = 40 //Large pointy crystal
 	damage_type = BRUTE
 	check_armour = "bullet"
-	modifier_type_to_apply = /datum/modifier/fire/weak
-	modifier_duration = 0.05 MINUTE
 	range = 12
 	hud_state = "laser_sniper"
+
+/obj/item/projectile/energy/flamecrystal/on_hit(atom/target, blocked = 0, def_zone)
+	. = ..()
+	if(isliving(target))
+		var/mob/living/L = target
+		L.adjust_fire_stacks(5)
+		L.ignite_mob()
 
 /obj/item/projectile/bullet/flamegun
 	use_submunitions = 1
@@ -147,12 +152,12 @@
 		/obj/item/hand_tele = 10,
 		/obj/item/bone/skull = 100
 			)
-	var/fullshield = 4
-	var/shieldrage = 4
+	var/fullshield = 140
+	var/shieldrage = 3
 
 /mob/living/simple_mob/humanoid/eclipse/head/tyrlead/bullet_act(obj/item/projectile/P) //Projectiles will be absorbed by the shield. Note to self do funky sprite. 4 hits to remove
 	if(fullshield > 0)
-		fullshield--
+		fullshield -= P.damage
 		if(P == /obj/item/projectile/ion)
 			fullshield = 0
 			visible_message(span_boldwarning(span_orange("[P] breaks the shield!!.")))
@@ -166,8 +171,8 @@
 		..()
 		shieldrage--
 		if(shieldrage == 0)
-			shieldrage = 4
-			fullshield = 4
+			shieldrage = 3
+			fullshield = 140
 			visible_message(span_boldwarning(span_orange("The shield reactivates!!.")))
 			icon_state = "overseer_shield"
 
@@ -295,11 +300,11 @@
 	var/deathdir = rand(1,3)
 	switch(deathdir)
 		if(1)
-			new /mob/living/simple_mob/mechanical/mining_drone/scavenger/eclipse (src.loc)
+			new /mob/living/simple_mob/mechanical/mining_drone/scavenger/eclipse(src.loc)
 		if(2)
-			new /mob/living/simple_mob/mechanical/hivebot/swarm/eclipse (src.loc)
+			new /mob/living/simple_mob/mechanical/hivebot/swarm/eclipse(src.loc)
 		if(3)
-			new /mob/living/simple_mob/mechanical/combat_drone/artillery
+			new /mob/living/simple_mob/mechanical/combat_drone/artillery(src.loc)
 	amount--
 	if(amount > 0)
 		addtimer(CALLBACK(src, PROC_REF(summon_drones), target, amount, fire_delay), fire_delay, TIMER_DELETE_ME)
@@ -544,10 +549,10 @@
 	var/health = 5
 	var/modifiertype = /datum/modifier/poisoned/weak
 
-/obj/effect/slimeattack/Crossed(atom/movable/AM as mob|obj)
-	if(AM.is_incorporeal())
+/obj/effect/slimeattack/Crossed(atom/movable/source)
+	if(source.is_incorporeal())
 		return
-	Bumped(AM)
+	Bumped(source)
 
 /obj/effect/slimeattack/attackby(var/obj/item/W, var/mob/user)
 	user.setClickCooldown(user.get_attack_speed(W))

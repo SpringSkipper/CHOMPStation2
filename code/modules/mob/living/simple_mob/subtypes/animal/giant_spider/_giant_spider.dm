@@ -69,8 +69,8 @@
 	icon_dead = "guard_dead"
 	has_eye_glow = TRUE
 	density = FALSE
-	minbodytemp = 175 //yw edit, Makes mobs survive cryogaia temps
-	faction = FACTION_AWAYMISSION //yw edit, Makes away mobs be on the same fuckin' side.
+	minbodytemp = 175
+	faction = FACTION_SPIDERS
 	maxHealth = 200
 	health = 200
 	pass_flags = PASSTABLE
@@ -205,7 +205,7 @@
 		victim = L
 		break
 
-	if(victim)
+	if(victim?.reagents)
 		victim.reagents.add_reagent(REAGENT_ID_WARNINGTOXIN, poison_per_bite)
 		victim.AdjustWeakened(2)
 		victim.visible_message(span_danger("\The [src] has bitten \the [victim]!"))
