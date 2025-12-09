@@ -172,7 +172,7 @@
 	playsound(src, 'sound/machines/click.ogg', 40, 1)
 	update_icon()
 
-/obj/machinery/appliance/AICtrlClick(mob/user)
+/obj/machinery/appliance/ctrl_click_ai(mob/user)
 	attempt_toggle_power(user)
 
 /obj/machinery/appliance/proc/choose_output()
@@ -282,7 +282,7 @@
 				return
 
 			if(QDELETED(wrap))
-				GR.WR = null
+				GR.update_ref(null)
 
 			if(wrap.loc != src)
 				GR.drop_item_nm()

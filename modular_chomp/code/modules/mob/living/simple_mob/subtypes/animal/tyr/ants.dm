@@ -1,12 +1,14 @@
 /mob/living/simple_mob/animal/tyr/mineral_ants
 	name = "metal ant"
 	desc = "A large ant."
-	icon_state = "ne_ant"
+	icon_state = "new_ant"
 	icon_dead = "dead_new"
-	maxHealth = 25 //two hits with agate sword, three with spear, one with hammer, four with bow
-	health = 25
+	maxHealth = 15
+	health = 15
 	pass_flags = PASSTABLE
 	movement_cooldown = 1
+
+	melee_miss_chance = 0
 
 	ai_holder_type = /datum/ai_holder/simple_mob/melee/evasive
 
@@ -26,6 +28,10 @@
 	butchery_loot = list(\
 		/obj/item/stack/material/steel = 6\
 		)
+
+	tame_items = list(
+	/obj/item/reagent_containers/food/snacks/jellyfishcore = 70
+	)
 
 	//I know very little of this
 	swallowTime = 3 SECONDS
@@ -79,7 +85,7 @@
 			visible_message(span_danger("\The [src] hits \the [L] with incredible force, to no visible effect!")) // CHOMPEdit: Visible/audible feedback for *resisting* the slam.
 			playsound(src, "punch", 50, 1) // CHOMPEdit: Visible/audible feedback for *resisting* the slam.
 
-/mob/living/simple_mob/animal/tyr/mineral_ants/copper //emp ants
+/mob/living/simple_mob/animal/tyr/mineral_ants/copper //lighting ants
 	name = "copper metal ant"
 	icon_state = "copper_ant"
 	icon_living = "copper_ant"
@@ -89,10 +95,15 @@
 	meat_amount = 3
 	meat_type = /obj/item/reagent_containers/food/snacks/copperant
 
-/mob/living/simple_mob/animal/tyr/mineral_ants/copper/apply_melee_effects(var/atom/A)
-	if(isliving(A))
-		A.emp_act(4) //The weakest strength of EMP
-		playsound(src, 'sound/weapons/Egloves.ogg', 75, 1)
+	special_attack_min_range = 0
+	special_attack_max_range = 2
+	special_attack_cooldown = 10 SECONDS
+
+/mob/living/simple_mob/animal/tyr/mineral_ants/copper/bullet_act(obj/item/projectile/P)
+	if(istype(P, /obj/item/projectile/energy) || istype(P, /obj/item/projectile/beam))
+		visible_message(span_cult("[P] seems ineffective!."))
+	else
+		..()
 
 /mob/living/simple_mob/animal/tyr/mineral_ants/agate //rushes at you and explodes
 	name = "agate metal ant"
@@ -105,7 +116,7 @@
 	meat_amount = 3
 	meat_type = /obj/item/reagent_containers/food/snacks/agateant
 
-	special_attack_min_range = 1
+	special_attack_min_range = 0
 	special_attack_max_range = 2
 	special_attack_cooldown = 10 SECONDS
 
@@ -116,7 +127,7 @@
 	name = "quartz metal ant"
 	icon_state = "quartz_ant"
 	icon_living = "quartz_ant"
-	armor = list(melee = 60, bullet = 50, laser = 0, energy = 0, bomb = 0, bio = 100, rad = 100)
+	armor = list(melee = 80, bullet = 80, laser = 0, energy = 0, bomb = 0, bio = 100, rad = 100)
 	butchery_loot = list(\
 		/obj/item/stack/material/quartz = 18\
 		)
@@ -134,30 +145,42 @@
 	meat_amount = 3
 	meat_type = /obj/item/reagent_containers/food/snacks/painiteant
 
-/mob/living/simple_mob/animal/tyr/mineral_ants/diamond
+/mob/living/simple_mob/animal/tyr/mineral_ants/diamond //slower, tankier, more damage
 	name = "diamond metal ant"
 	icon_state = "diamond_ant"
 	icon_living = "diamond_ant"
+	maxHealth = 50
+	health = 50
+	melee_damage_lower = 24
+	melee_damage_upper = 24
+	movement_cooldown = 3
 	butchery_loot = list(\
 		/obj/item/stack/material/diamond = 18\
 		)
 
 /mob/living/simple_mob/animal/tyr/mineral_ants/verdantium
 	name = "green metal ant"
+	evasion = 50
 	icon_state = "verdantium_ant"
 	icon_living = "verdantium_ant"
 	butchery_loot = list(\
 		/obj/item/stack/material/verdantium = 18\
 		)
 
-/mob/living/simple_mob/animal/tyr/mineral_ants/uranium
+/mob/living/simple_mob/animal/tyr/mineral_ants/uranium //if it melees, it unleashes rads
 	name = "glowing metal ant"
 	icon_state = "rad_ant"
 	icon_living = "rad_ant"
 	butchery_loot = list(\
 		/obj/item/stack/material/uranium = 18\
 		)
+
+	special_attack_min_range = 1
+	special_attack_max_range = 2
+	special_attack_cooldown = 5 SECONDS
+
 /mob/living/simple_mob/animal/tyr/mineral_ants/uranium/do_special_attack(atom/A)
+	visible_message(span_bolddanger(span_orange("The ant glows bright green!.")))
 	SSradiation.radiate(src, 15)
 
 /mob/living/simple_mob/animal/tyr/mineral_ants/tritium
@@ -168,13 +191,15 @@
 		/obj/item/stack/material/tritium = 18\
 		)
 
-/mob/living/simple_mob/animal/tyr/mineral_ants/mhydro
+/mob/living/simple_mob/animal/tyr/mineral_ants/mhydro //secondary spawner
 	name = "mhydro ant"
 	icon_state = "mhydro_ant"
 	icon_living = "mhydro_ant"
 	butchery_loot = list(\
 		/obj/item/stack/material/mhydrogen = 6\
 		)
+	size_multiplier = 0.5
+	movement_cooldown = -1
 
 /mob/living/simple_mob/animal/tyr/mineral_ants/builder
 	name = "concrete ant"
@@ -205,7 +230,7 @@
 	// Get our AI to stay still.
 	set_AI_busy(TRUE)
 
-	if(!do_mob(src, T, 5 SECONDS))
+	if(!do_after(src, 5 SECONDS, T))
 		set_AI_busy(FALSE)
 		to_chat(src, span_warning("You need to stay still to spin a web on \the [T]."))
 		return FALSE
@@ -220,7 +245,7 @@
 	return TRUE
 
 
-/mob/living/simple_mob/animal/tyr/mineral_ants/queen //There will only be two queens on the map, and the source of further ants. Farming dies if they die.
+/mob/living/simple_mob/animal/tyr/mineral_ants/queen //the nurses of the ants
 	name = "queen ant"
 	icon_state = "queen_ant"
 	maxHealth = 60 //four hits with agate sword, five with spear, two with hammer, eight with bow
@@ -228,7 +253,7 @@
 	butchery_loot = list(\
 		/obj/item/stack/material/valhollide = 4\
 		)
-	nutrition = 480
+	nutrition = 630
 	var/build_type = /obj/effect/spider/spiderling/antling
 
 
@@ -251,7 +276,7 @@
 	// Get our AI to stay still.
 	set_AI_busy(TRUE)
 
-	if(!do_mob(src, T, 5 SECONDS))
+	if(!do_after(src, 5 SECONDS, T))
 		set_AI_busy(FALSE)
 		to_chat(src, span_warning("You need to stay still to spin a web on \the [T]."))
 		return FALSE
@@ -280,7 +305,7 @@ ANT STRUCTURES
 
 	spawn_types = list(
 	/mob/living/simple_mob/animal/tyr/mineral_ants/bronze = 1,
-	/mob/living/simple_mob/animal/tyr/mineral_ants/builder = 2,
+	/mob/living/simple_mob/animal/tyr/mineral_ants/builder = 1,
 	/mob/living/simple_mob/animal/tyr/mineral_ants/copper = 1,
 	/mob/living/simple_mob/animal/tyr/mineral_ants/quartz = 1,
 	/mob/living/simple_mob/animal/tyr/mineral_ants/agate = 1,
@@ -288,10 +313,11 @@ ANT STRUCTURES
 	/mob/living/simple_mob/animal/tyr/mineral_ants/diamond = 1,
 	/mob/living/simple_mob/animal/tyr/mineral_ants/verdantium = 1,
 	/mob/living/simple_mob/animal/tyr/mineral_ants/tritium = 1,
-	/mob/living/simple_mob/animal/tyr/mineral_ants/uranium = 1
+	/mob/living/simple_mob/animal/tyr/mineral_ants/uranium = 1,
+	/mob/living/simple_mob/animal/tyr/mineral_ants/mhydro = 1
 	)
 
-	simultaneous_spawns = 5
+	simultaneous_spawns = 3
 
 	destructible = 1
 	health = 50 //Unsure why you would want to break it but you can
@@ -347,7 +373,7 @@ ANT STRUCTURES
 		return
 	if(anchored && isliving(source))
 		var/mob/living/L = source
-		if(L == /mob/living/simple_mob/animal/tyr/mineral_ants)
+		if(L.faction == FACTION_TYR_ANT)
 			return
 		else if(L.m_intent == I_RUN)
 			L.visible_message(
@@ -361,10 +387,6 @@ ANT STRUCTURES
 
 /obj/effect/ant_structure/trap/proc/attack_mob(mob/living/L)
 	L.add_modifier(modifiertype, 5 SECONDS)
-
-/obj/effect/ant_structure/trap/knockdown
-	icon_state = "knock_trap"
-	modifiertype = /datum/modifier/poisoned
 
 /obj/effect/ant_structure/trap/burn
 	icon_state = "burn_trap"
@@ -392,7 +414,6 @@ ANT STRUCTURES
 /obj/random/ant_building/item_to_spawn()
 	return pick(/obj/effect/ant_structure/wall,
 				/obj/effect/ant_structure/trap/burn,
-				/obj/effect/ant_structure/trap/knockdown,
 				/obj/effect/ant_structure/trap/slowdown)
 
 

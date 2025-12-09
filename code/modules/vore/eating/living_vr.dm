@@ -183,10 +183,9 @@
 
 	// Body writing
 	else if(istype(I, /obj/item/pen))
-		// Avoids having an override on this proc because attempt_vr won't call the override
 		if(!ishuman(src))
 			return FALSE
-		var/mob/living/carbon/human/us = src
+		var/mob/living/carbon/human/canvas_user = src
 
 		if(!isliving(user))
 			return FALSE
@@ -206,25 +205,23 @@
 		if(!message)
 			return TRUE
 
-		add_attack_logs(attacker, us, "wrote \"[message]\"")
+		to_chat(canvas_user, span_notice("[attacker] is attempting to write on your [affecting.name]!"))
+		attacker.visible_message(span_notice("[attacker] starts writing on [canvas_user]'s [affecting.name]."), \
+			span_notice("You start writing on [canvas_user]'s [affecting.name]..."))
 
-		LAZYSET(us.body_writing, affecting.organ_tag, message)
+		// Progress bar for writing on someone for better consent check.
+		if(!do_after(attacker, 3 SECONDS, target = canvas_user, max_distance = 1))
+			to_chat(attacker, span_warning("You stop writing on [canvas_user]."))
+			return TRUE
+
+		add_attack_logs(attacker, canvas_user, "wrote \"[message]\"")
+
+		LAZYSET(canvas_user.body_writing, affecting.organ_tag, message)
+
+		attacker.visible_message(span_notice("[attacker] finishes writing on [canvas_user]'s [affecting.name]."), \
+			span_notice("You finish writing on [canvas_user]'s [affecting.name]."))
 		return TRUE
 
-	return FALSE
-
-//
-// Our custom resist catches for /mob/living
-//
-/mob/living/proc/vore_process_resist()
-	//Are we resisting from inside a belly?
-	// if(isbelly(loc))
-	// 	var/obj/belly/B = loc
-	// 	B.relay_resist(src)
-	// 	return TRUE //resist() on living does this TRUE thing.
-	// Note: This is no longer required, as the refactors to resisting allow bellies to just define container_resist
-
-	//Other overridden resists go here
 	return FALSE
 
 //
@@ -364,14 +361,14 @@
 		return
 
 	load_character(slotnum)
-	attempt_vr(user.client?.prefs_vr,"load_vore","")
+	user.client?.prefs_vr.load_vore()
 	sanitize_preferences()
 
 	return remember_default
 
 /datum/preferences/proc/return_to_character_slot(mob/user, var/remembered_default)
 	load_character(remembered_default)
-	attempt_vr(user.client?.prefs_vr,"load_vore","")
+	user.client?.prefs_vr.load_vore()
 	sanitize_preferences()
 
 //
@@ -1062,10 +1059,13 @@
 		dat += span_bold("Affected by temperature:") + " [allowtemp ? span_green("Enabled") : span_red("Disabled")]<br>"
 		dat += span_bold("Autotransferable:") + " [autotransferable ? span_green("Enabled") : span_red("Disabled")]<br>"
 		dat += span_bold("Can be stripped:") + " [strip_pref ? span_green("Allowed") : span_red("Disallowed")]<br>"
+		dat += span_bold("Worn items can be contaminated:") + " [contaminate_pref ? span_green("Allowed") : span_red("Disallowed")]<br>"
 		dat += span_bold("Applying reagents:") + " [apply_reagents ? span_green("Allowed") : span_red("Disallowed")]<br>"
 		dat += span_bold("Leaves Remains:") + " [digest_leave_remains ? span_green("Enabled") : span_red("Disabled")]<br>"
-	dat += span_bold("Spontaneous vore prey:") + " [can_be_drop_prey ? span_green("Enabled") : span_red("Disabled")]<br>"
+		dat += span_bold("Spontaneous vore prey:") + " [can_be_drop_prey ? span_green("Enabled") : span_red("Disabled")]<br>"
+		dat += span_bold("AFK/Disconnected vore prey:") + " [can_be_afk_prey ? span_green("Enabled") : span_red("Disabled")]<br>"
 	dat += span_bold("Spontaneous vore pred:") + " [can_be_drop_pred ? span_green("Enabled") : span_red("Disabled")]<br>"
+	dat += span_bold("AFK/Disconnected vore pred:") + " [can_be_afk_pred ? span_green("Enabled") : span_red("Disabled")]<br>"
 	if(can_be_drop_prey || can_be_drop_pred)
 		dat += span_bold("Drop Vore:") + " [drop_vore ? span_green("Enabled") : span_red("Disabled")]<br>"
 		dat += span_bold("Slip Vore:") + " [slip_vore ? span_green("Enabled") : span_red("Disabled")]<br>"
@@ -1297,6 +1297,8 @@
 		screen_icon.icon = HUD.ui_style
 		screen_icon.color = HUD.ui_color
 		screen_icon.alpha = HUD.ui_alpha
+	if(isAI(user))
+		screen_icon.screen_loc = ui_ai_pda_send
 	LAZYADD(HUD.other_important, screen_icon)
 	user.client?.screen += screen_icon
 

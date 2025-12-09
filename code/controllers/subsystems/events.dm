@@ -11,13 +11,13 @@ SUBSYSTEM_DEF(events)
 	var/list/datum/event/finished_events = list()
 
 	var/list/datum/event/allEvents
-	var/list/datum/event_container/event_containers
+	var/alist/event_containers
 
 	var/datum/event_meta/new_event = new
 
 /datum/controller/subsystem/events/Initialize()
 	allEvents = subtypesof(/datum/event)
-	event_containers = list(
+	event_containers = alist(
 			EVENT_LEVEL_MUNDANE 	= new/datum/event_container/mundane,
 			EVENT_LEVEL_MODERATE	= new/datum/event_container/moderate,
 			EVENT_LEVEL_MAJOR 		= new/datum/event_container/major
@@ -88,7 +88,7 @@ SUBSYSTEM_DEF(events)
 		if(E.isRunning)
 			message += "and is still running."
 		else
-			if(E.endedAt - E.startedAt > MinutesToTicks(5)) // Only mention end time if the entire duration was more than 5 minutes
+			if(E.endedAt - E.startedAt > 5 MINUTES) // Only mention end time if the entire duration was more than 5 minutes
 				message += "and ended at [worldtime2stationtime(E.endedAt)]."
 			else
 				message += "and ran to completion."

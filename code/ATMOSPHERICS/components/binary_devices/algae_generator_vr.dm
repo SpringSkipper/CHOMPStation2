@@ -172,10 +172,10 @@
 		ui.open()
 
 /obj/machinery/atmospherics/binary/algae_farm/tgui_data(mob/user)
-	var/data[0]
+	var/list/data = list()
 	data["panelOpen"] = panel_open
 
-	var/materials_ui[0]
+	var/list/materials_ui = list()
 	for(var/M in stored_material)
 		materials_ui[++materials_ui.len] = list(
 				"name" = M,
@@ -257,7 +257,6 @@
 			S.use(1)
 			count++
 		user.visible_message("\The [user] inserts [S.name] into \the [src].", span_notice("You insert [count] [S.name] into \the [src]."))
-		updateUsrDialog(user)
 	else
 		to_chat(user, span_warning("\The [src] cannot hold more [S.name]."))
 	return 1

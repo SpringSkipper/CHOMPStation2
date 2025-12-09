@@ -21,37 +21,48 @@
 	icon_state = "deck"
 	drop_sound = 'sound/items/drop/paper.ogg'
 	pickup_sound = 'sound/items/pickup/paper.ogg'
+	var/card_icon_prefix = ""
+	var/deck_size = 1 // # of times we will generate cards within this deck
+
+/obj/item/deck/cards/proc/init_cards()
+	PROTECTED_PROC(TRUE)
+	var/datum/playingcard/pcard
+	for(var/i = 0, i < deck_size, i++)
+		for(var/suit in list("spades","clubs","diamonds","hearts"))
+			var/colour
+			switch(suit)
+				if("clubs", "spades")
+					colour = "black_"
+				else
+					colour = "red_"
+
+			for(var/number in list("ace","two","three","four","five","six","seven","eight","nine","ten"))
+				pcard = new()
+				pcard.name = "[number] of [suit]"
+				pcard.card_icon = "[card_icon_prefix][colour]num"
+				pcard.back_icon = "[card_icon_prefix]card_back"
+				cards += pcard
+
+			for(var/number in list("jack","queen","king"))
+				pcard = new()
+				pcard.name = "[number] of [suit]"
+				pcard.card_icon = "[card_icon_prefix][colour]col"
+				pcard.back_icon = "[card_icon_prefix]card_back"
+				cards += pcard // Make it so.
+
+		init_jokers()
+
+/obj/item/deck/cards/proc/init_jokers()
+	var/datum/playingcard/pcard
+	for(var/i = 0, i<2, i++)
+		pcard = new()
+		pcard.name = "joker"
+		pcard.card_icon = "joker"
+		cards += pcard
 
 /obj/item/deck/cards/Initialize(mapload)
 	. = ..()
-	var/datum/playingcard/P
-	for(var/suit in list("spades","clubs","diamonds","hearts"))
-
-		var/colour
-		if(suit == "spades" || suit == "clubs")
-			colour = "black_"
-		else
-			colour = "red_"
-
-		for(var/number in list("ace","two","three","four","five","six","seven","eight","nine","ten"))
-			P = new()
-			P.name = "[number] of [suit]"
-			P.card_icon = "[colour]num"
-			P.back_icon = "card_back"
-			cards += P
-
-		for(var/number in list("jack","queen","king"))
-			P = new()
-			P.name = "[number] of [suit]"
-			P.card_icon = "[colour]col"
-			P.back_icon = "card_back"
-			cards += P
-
-	for(var/i = 0, i<2, i++)
-		P = new()
-		P.name = "joker"
-		P.card_icon = "joker"
-		cards += P
+	init_cards()
 
 /obj/item/deck/attackby(obj/O, mob/user)
 	if(istype(O,/obj/item/hand))
@@ -242,10 +253,10 @@
 
 	user.visible_message(span_notice("\The [user] searches for specific cards in \the [src], and draws [cards_to_draw.len]."))
 
-/obj/item/deck/CtrlClick(mob/user)
+/obj/item/deck/item_ctrl_click(mob/user)
 	deal_card()
 
-/obj/item/deck/CtrlShiftClick(mob/user)
+/obj/item/deck/click_ctrl_shift(mob/user)
 	deal_card_multi()
 
 /obj/item/deck/proc/deal_at(mob/user, mob/target, dcard) // Take in the no. of card to be dealt
@@ -258,8 +269,7 @@
 		H.concealed = 1
 		H.update_icon()
 	if(user==target)
-		var/datum/gender/TU = GLOB.gender_datums[user.get_visible_gender()]
-		user.visible_message(span_notice("\The [user] deals [dcard] card(s) to [TU.himself]."))
+		user.visible_message(span_notice("\The [user] deals [dcard] card(s) to [user.p_themselves()]."))
 	else
 		user.visible_message(span_notice("\The [user] deals [dcard] card(s) to \the [target]."))
 	H.throw_at(get_step(target,target.dir),10,1,H)
@@ -319,7 +329,7 @@
 	else
 		return
 
-/obj/item/deck/AltClick(mob/user)
+/obj/item/deck/click_alt(mob/user)
 	if(user.stat || !Adjacent(user))
 		return
 	shuffle(user)
@@ -363,38 +373,7 @@
 /obj/item/deck/cards/triple
 	name = "big deck of cards"
 	desc = "A simple deck of playing cards with triple the number of cards."
-
-/obj/item/deck/cards/triple/Initialize(mapload)
-	. = ..()
-	var/datum/playingcard/P
-	for(var/a = 0, a<3, a++)
-		for(var/suit in list("spades","clubs","diamonds","hearts"))
-
-			var/colour
-			if(suit == "spades" || suit == "clubs")
-				colour = "black_"
-			else
-				colour = "red_"
-
-			for(var/number in list("ace","two","three","four","five","six","seven","eight","nine","ten"))
-				P = new()
-				P.name = "[number] of [suit]"
-				P.card_icon = "[colour]num"
-				P.back_icon = "card_back"
-				cards += P
-
-			for(var/number in list("jack","queen","king"))
-				P = new()
-				P.name = "[number] of [suit]"
-				P.card_icon = "[colour]col"
-				P.back_icon = "card_back"
-				cards += P
-
-		for(var/i = 0, i<2, i++)
-			P = new()
-			P.name = "joker"
-			P.card_icon = "joker"
-			cards += P
+	deck_size = 3
 
 /obj/item/pack/
 	name = "Card Pack"
@@ -590,10 +569,10 @@
 	..()
 	src.update_icon()
 
-/obj/item/hand/CtrlClick(mob/user)
+/obj/item/hand/item_ctrl_click(mob/user)
 	if(user.stat || !Adjacent(user))
 		return
 	discard()
 
-/obj/item/hand/AltClick(mob/user)
+/obj/item/hand/click_alt(mob/user)
 	Removecard()

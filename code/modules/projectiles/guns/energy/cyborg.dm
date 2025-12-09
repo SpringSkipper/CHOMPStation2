@@ -273,7 +273,7 @@
 				target.visible_message(span_danger("[target] has been zapped with [src] by [user]!"))
 
 	playsound(src, 'sound/weapons/egloves.ogg', 50, 1, -1)
-	target.stun_effect_act(0, agony, hit_zone, src)
+	target.stun_effect_act(0, agony, hit_zone, src, electric = TRUE)
 	msg_admin_attack("[key_name(user)] stunned [key_name(target)] with the [src].")
 	if(ishuman(target))
 		var/mob/living/carbon/human/H = target
@@ -327,7 +327,7 @@
 	else
 		set_light(0)
 
-/obj/item/melee/robotic/blade/AltClick(mob/living/user)
+/obj/item/melee/robotic/blade/click_alt(mob/living/user)
 	if(!in_range(src, user))	//Basic checks to prevent abuse
 		return
 	if(user.incapacitated() || !istype(user))
@@ -495,7 +495,7 @@
 	else
 		target.visible_message(span_danger("[target] has been prodded with [src] by [user]!"))
 	playsound(src, 'sound/weapons/egloves.ogg', 50, 1, -1)
-	target.stun_effect_act(stun, agony, hit_zone, src)
+	target.stun_effect_act(stun, agony, hit_zone, src, electric = TRUE)
 	msg_admin_attack("[key_name(user)] stunned [key_name(target)] with the [src].")
 	if(ishuman(target))
 		var/mob/living/carbon/human/H = target
