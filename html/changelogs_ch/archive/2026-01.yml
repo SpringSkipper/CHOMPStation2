@@ -111,3 +111,16 @@
   - bugfix: Fixed pyroclastic anomaly sending weather anomaly alerts
   wide eyes:
   - bugfix: fixes airlock, solars, and hopefully fixes sec intercom
+2026-01-09:
+  CHOMPStation2StaffMirrorBot:
+  - code_imp: moves those alists to lists
+  - balance: Security Protolathe can now print researched device cells.
+  - code_imp: cleans up the vore fx and resist code
+  - bugfix: multiple throwing issues
+2026-01-13:
+  CHOMPStation2StaffMirrorBot:
+  - qol: prey struggles are now intent based
+  - bugfix: Fixes the ddraig description.
+  FluffMedic:
+  - bugfix: fixed the bug where if haste was picked first, hardy and the strength
+      buffs could be grabbed
