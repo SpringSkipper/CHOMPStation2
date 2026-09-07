@@ -1,12 +1,14 @@
 import dateformat from 'dateformat';
-import yaml from 'js-yaml';
+import { CORE_SCHEMA, load } from 'js-yaml';
 import { useEffect, useMemo, useState } from 'react';
 import { resolveAsset } from 'tgui/assets';
 import { useBackend } from 'tgui/backend';
 import { Window } from 'tgui/layouts';
 import { Stack } from 'tgui-core/components';
+import { fetchRetry } from 'tgui-core/http';
 import { Changes } from './Changes';
 import { DateDropdown } from './DateDropdown';
+import { isChangelogEntry } from './function';
 import { Footer } from './Resources/Footer';
 import { Header } from './Resources/Header';
 import { Testmerges } from './Testmerges';
@@ -38,7 +40,7 @@ export const Changelog = (props) => {
 
     act('get_month', { date });
 
-    fetch(resolveAsset(`${date}.yml`)).then(async (changelogData) => {
+    fetchRetry(resolveAsset(`${date}.yml`)).then(async (changelogData) => {
       const result = await changelogData.text();
       const errorRegex = /^Cannot find/;
 
@@ -50,10 +52,10 @@ export const Changelog = (props) => {
           getData(date, attemptNumber + 1);
         }, timeout);
       } else {
-        const parsed = yaml.load(result, { schema: yaml.CORE_SCHEMA });
+        const parsed = load(result, { schema: CORE_SCHEMA });
         if (parsed === null || parsed === undefined) {
           setData('Changelog is empty or invalid');
-        } else if (typeof parsed === 'string' || typeof parsed === 'object') {
+        } else if (isChangelogEntry(parsed)) {
           setData(parsed);
         } else {
           setData('Unexpected changelog format');

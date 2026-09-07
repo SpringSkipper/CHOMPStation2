@@ -74,7 +74,7 @@
 			/obj/item/reagent_containers/spray/cleaner,
 			/obj/item/reagent_containers/glass/rag,
 			/obj/item/grenade/chem_grenade/cleaner = 3,
-			/obj/item/vac_attachment, //CHOMPAdd
+			/obj/item/vac_attachment,
 			/obj/item/clothing/glasses/hud/janitor,
 			/obj/structure/mopbucket
 			)
@@ -146,7 +146,7 @@
 			/obj/item/clothing/gloves/black,
 			/obj/item/clothing/shoes/black,
 			/obj/item/analyzer,
-			/obj/item/storage/bag/ore,
+			/obj/item/ore_bag,
 			/obj/item/flashlight/lantern,
 			/obj/item/shovel,
 			/obj/item/pickaxe,

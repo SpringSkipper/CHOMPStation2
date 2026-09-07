@@ -11,7 +11,7 @@
 
 // Adds a list of pre-disabled events to the available events list.
 // This keeps them in the rotation, but disabled, so they can be enabled with a click if desired that round.
-/datum/event_container/proc/add_disabled_events(var/list/disabled_events)
+/datum/event_container/proc/add_disabled_events(list/disabled_events)
 	for(var/datum/event_meta/EM in disabled_events)
 		EM.enabled = 0
 		available_events += EM
@@ -64,6 +64,7 @@
 		new /datum/event_meta(EVENT_LEVEL_MODERATE, "Communication Blackout",	/datum/event/communications_blackout,	250,	list(JOB_AI = 100, DEPARTMENT_SECURITY = 50, DEPARTMENT_ANY = 2), TRUE),
 		new /datum/event_meta(EVENT_LEVEL_MODERATE, "Dimensional Anomaly",		/datum/event/anomaly/dimensional,		40,		list(DEPARTMENT_RESEARCH = 30, JOB_RESEARCH_DIRECTOR = 20, DEPARTMENT_ANY = 2), TRUE),
 		new /datum/event_meta(EVENT_LEVEL_MODERATE, "Drone Pod Drop",			/datum/event/drone_pod_drop,			10,		list(DEPARTMENT_RESEARCH = 40, DEPARTMENT_ANY = 2), TRUE),
+		new /datum/event_meta(EVENT_LEVEL_MODERATE, "Dust Anomaly",				/datum/event/anomaly/dust, 				30,		list(JOB_JANITOR = 30, DEPARTMENT_RESEARCH = 20, JOB_RESEARCH_DIRECTOR = 15, DEPARTMENT_ANY = 2), TRUE),
 		new /datum/event_meta(EVENT_LEVEL_MODERATE, "Flux Anomaly",				/datum/event/anomaly/flux,				20,		list(DEPARTMENT_ENGINEERING = 30, JOB_CHIEF_ENGINEER = 20, DEPARTMENT_RESEARCH = 25, JOB_RESEARCH_DIRECTOR = 15, DEPARTMENT_ANY = 2), TRUE),
 		// Just blows out a few lights
 		new /datum/event_meta(EVENT_LEVEL_MODERATE, "Electrical Storm",			/datum/event/electrical_storm, 			250,	list(DEPARTMENT_ENGINEERING = 20, JOB_JANITOR = 150, DEPARTMENT_ANY = 2), TRUE),
@@ -85,7 +86,7 @@
 		new /datum/event_meta(EVENT_LEVEL_MODERATE, "Meteor Shower",			/datum/event/meteor_wave,				-50,	list(DEPARTMENT_ENGINEERING = 45, DEPARTMENT_ANY = 2), TRUE, min_jobs = list(DEPARTMENT_ENGINEERING = 2)),
 		//New CHOMPStation event. Mice and lizards grow into rats and lizardmen respectively.
 		new /datum/event_meta(EVENT_LEVEL_MODERATE, "Mutants",					/datum/event/mutants,					20,		list(DEPARTMENT_ANY = 15, DEPARTMENT_SECURITY = 25, DEPARTMENT_ANY = 2), TRUE),
-		new /datum/event_meta(EVENT_LEVEL_MODERATE, "Pyroclastic Anomaly", 		/datum/event/anomaly/pyro,				-20,	list(DEPARTMENT_ENGINEERING = 30, JOB_CHIEF_ENGINEER = 20, DEPARTMENT_RESEARCH = 20, JOB_RESEARCH_DIRECTOR = 10, DEPARTMENT_ANY = 2), TRUE, min_jobs = list(DEPARTMENT_ENGINEERING = 1)),
+		new /datum/event_meta(EVENT_LEVEL_MODERATE, "Pyroclastic Anomaly", 		/datum/event/anomaly/pyro,				-40,	list(DEPARTMENT_ENGINEERING = 30, JOB_CHIEF_ENGINEER = 20, DEPARTMENT_RESEARCH = 20, JOB_RESEARCH_DIRECTOR = 10, DEPARTMENT_ANY = 2), TRUE, min_jobs = list(DEPARTMENT_ENGINEERING = 2)),
 		new /datum/event_meta(EVENT_LEVEL_MODERATE, "Radiation Storm",			/datum/event/radiation_storm, 			50,		list(DEPARTMENT_MEDICAL = 50, DEPARTMENT_MEDICAL = 2), TRUE),
 		new /datum/event_meta(EVENT_LEVEL_MODERATE, "Rogue Drones",				/datum/event/rogue_drone, 				-30,	list(DEPARTMENT_SECURITY = 25, JOB_HEAD_OF_SECURITY = 35, JOB_WARDEN = 35, DEPARTMENT_ANY = 2), min_jobs = list(DEPARTMENT_SECURITY = 2)),
 		// Radiation, but only in space.

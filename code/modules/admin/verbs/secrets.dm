@@ -57,16 +57,7 @@ ADMIN_VERB(secrets, R_HOLDER, "Secrets", "Abuse harder than you ever have before
 			browser.set_content(dat)
 			browser.open()
 		if("dialog_log")
-			var/dat = span_bold("Dialog Log<HR>")
-			dat += "<fieldset style='border: 2px solid white; display: inline'>"
-			for(var/l in GLOB.round_text_log)
-				dat += "<li>[l]</li>"
-			dat += "</fieldset>"
-			if(!GLOB.round_text_log)
-				dat += "No-one has said anything this round! (How odd?)"
-			var/datum/browser/browser = new(holder, "dialog_logs", "[src]", 550, 650, src)
-			browser.set_content(jointext(dat,null))
-			browser.open()
+			SSadmin_verbs.dynamic_invoke_verb(ui.user, /datum/admin_verb/persistent_client_logs)
 		if("show_admins")
 			var/dat
 			if(GLOB.admin_datums)
@@ -77,7 +68,7 @@ ADMIN_VERB(secrets, R_HOLDER, "Secrets", "Abuse harder than you ever have before
 				browser.set_content(dat)
 				browser.open()
 		if("show_traitors_and_objectives") // Not implemented in the UI
-			holder.holder.check_antagonists()
+			holder.holder.check_antagonists(ui.user.client)
 		if("show_game_mode")
 			if (SSticker.mode) tgui_alert_async(holder, "The game mode is [SSticker.mode.name]")
 			else tgui_alert_async(holder, "For some reason there's a ticker, but not a game mode")
@@ -319,11 +310,11 @@ ADMIN_VERB(secrets, R_HOLDER, "Secrets", "Abuse harder than you ever have before
 			if(GLOB.gravity_is_on)
 				log_admin("[key_name(holder)] toggled gravity on.", 1)
 				message_admins(span_notice("[key_name_admin(holder)] toggled gravity on."), 1)
-				command_announcement.Announce("Gravity generators are again functioning within normal parameters. Sorry for any inconvenience.")
+				GLOB.command_announcement.Announce("Gravity generators are again functioning within normal parameters. Sorry for any inconvenience.", ANNOUNCER_MSG_GRAVITY_ON)
 			else
 				log_admin("[key_name(holder)] toggled gravity off.", 1)
 				message_admins(span_notice("[key_name_admin(holder)] toggled gravity off."), 1)
-				command_announcement.Announce("Feedback surge detected in mass-distributions systems. Artificial gravity has been disabled whilst the system reinitializes. Further failures may result in a gravitational collapse and formation of blackholes. Have a nice day.")
+				GLOB.command_announcement.Announce("Feedback surge detected in mass-distributions systems. Artificial gravity has been disabled whilst the system reinitializes. Further failures may result in a gravitational collapse and formation of blackholes. Have a nice day.", ANNOUNCER_MSG_GRAVITY_OFF)
 		if("tripleAI")
 			if(!is_funmin)
 				return
@@ -392,10 +383,10 @@ ADMIN_VERB(secrets, R_HOLDER, "Secrets", "Abuse harder than you ever have before
 			var/choice = tgui_alert(holder, "How do you wish for Nar-Sie to interact with its surroundings?","NarChoice",list("CultStation13", "Nar-Singulo"))
 			if(choice == "CultStation13")
 				log_and_message_admins("has set narsie's behaviour to \"CultStation13\".", holder)
-				narsie_behaviour = choice
+				GLOB.narsie_behaviour = choice
 			if(choice == "Nar-Singulo")
 				log_and_message_admins("has set narsie's behaviour to \"Nar-Singulo\".", holder)
-				narsie_behaviour = choice
+				GLOB.narsie_behaviour = choice
 
 		if("remove_all_clothing")
 			for(var/obj/item/clothing/O in world)
@@ -427,8 +418,8 @@ ADMIN_VERB(secrets, R_HOLDER, "Secrets", "Abuse harder than you ever have before
 		if("supermatter_cascade")
 			var/choice = tgui_alert(holder, "You sure you want to destroy the universe and create a large explosion at your location? Misuse of this could result in removal of flags or hilarity.","WARNING!", list("NO TIME TO EXPLAIN", "Cancel"))
 			if(choice == "NO TIME TO EXPLAIN")
-				explosion(get_turf(holder), 8, 16, 24, 32, 1)
-				new /turf/unsimulated/wall/supermatter(get_turf(holder))
+				explosion(get_turf(holder.mob), 8, 16, 24, 32, 1)
+				SSturf_cascade.start_cascade(get_turf(holder.mob), /turf/unsimulated/wall/supermatter)
 				SetUniversalState(/datum/universal_state/supermatter_cascade)
 				message_admins("[key_name_admin(holder)] has managed to destroy the universe with a supermatter cascade. Good job, [key_name_admin(holder)]")
 

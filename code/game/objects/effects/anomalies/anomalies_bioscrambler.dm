@@ -5,6 +5,7 @@
 	pass_flags = PASSTABLE | PASSGLASS | PASSGRILLE
 	layer = ABOVE_MOB_LAYER
 	lifespan = ANOMALY_COUNTDOWN_TIMER * 2
+	danger_mult = 1.1
 
 	/// Who are we moving towards?
 	var/datum/weakref/pursuit_target
@@ -19,8 +20,14 @@
 	. = ..()
 	pursuit_target = WEAKREF(find_nearest_target())
 
+/obj/effect/anomaly/bioscrambler/Destroy()
+	. = ..()
+	pursuit_target = null
+
 /obj/effect/anomaly/bioscrambler/anomalyEffect(seconds_per_tick)
 	. = ..()
+	if(stats)
+		return
 	if(!COOLDOWN_FINISHED(src, pulse_cooldown))
 		return
 
@@ -28,6 +35,8 @@
 	playsound(src, 'sound/effects/cosmic_energy.ogg', vol = 50, vary = TRUE)
 	COOLDOWN_START(src, pulse_cooldown, pulse_delay)
 	for(var/mob/living/carbon/human/nearby in viewers(range, src))
+		if(nearby.isSynthetic() || nearby.species.flags & NO_DNA)
+			continue
 		var/susceptibility = GetAnomalySusceptibility(nearby)
 		if(prob(susceptibility * 100))
 			randmutb(nearby)
@@ -66,9 +75,14 @@
 			continue
 		if(SEND_SIGNAL(target, COMSIG_CHECK_FOR_GODMODE) & COMSIG_GODMODE_CANCEL)
 			continue
+		if(target.isSynthetic() || target.species.flags & NO_DNA)
+			continue
+		if(target.is_incorporeal())
+			continue
 		if(target.stat >= UNCONSCIOUS)
 			continue
-		if(istype(get_area(target), /area/crew_quarters))
+		var/area/target_area = get_area(target)
+		if(target_area.flag_check(AREA_FORBID_EVENTS))
 			continue
 		var/distance_from_target = get_dist(src, target)
 		if(distance_from_target >= closest_distance)
@@ -87,3 +101,15 @@
 /obj/effect/anomaly/bioscrambler/detonate()
 	COOLDOWN_RESET(src, pulse_cooldown)
 	anomalyEffect()
+
+/obj/effect/anomaly/bioscrambler/anomalyPulse()
+	if(!..())
+		return
+
+	switch(stats.severity)
+		if(0 to 15)
+			var/datum/effect/effect/system/spark_spread/sparks = new /datum/effect/effect/system/spark_spread
+			sparks.set_up(3, 1, src)
+			sparks.start()
+		else
+			anomalyEffect()

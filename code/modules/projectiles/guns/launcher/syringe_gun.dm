@@ -4,7 +4,7 @@
 	icon = 'icons/obj/ammo.dmi'
 	icon_state = "syringe-cartridge"
 	var/icon_flight = "syringe-cartridge-flight" //so it doesn't look so weird when shot
-	matter = list(MAT_STEEL = 125, MAT_GLASS = 375)
+	matter = list(MAT_STEEL = MATERIAL_COST(0.0625), MAT_GLASS = MATERIAL_COST(0.1875))
 	slot_flags = SLOT_BELT | SLOT_EARS
 	throwforce = 3
 	force = 3
@@ -19,6 +19,9 @@
 
 /obj/item/syringe_cartridge/attackby(obj/item/I, mob/user)
 	if(istype(I, /obj/item/reagent_containers/syringe))
+		if(syringe)
+			to_chat(user, span_warning("[src] already has a syringe loaded!"))
+			return
 		syringe = I
 		to_chat(user, span_notice("You carefully insert [syringe] into [src]."))
 		user.remove_from_mob(syringe)
@@ -73,7 +76,7 @@
 	item_state = "syringegun"
 	w_class = ITEMSIZE_NORMAL
 	force = 7
-	matter = list(MAT_STEEL = 2000)
+	matter = list(MAT_STEEL = MATERIAL_COST(1))
 	slot_flags = SLOT_BELT | SLOT_HOLSTER
 
 	fire_sound = 'sound/weapons/empty.ogg'
@@ -128,7 +131,7 @@
 	else
 		..()
 
-/obj/item/gun/launcher/syringe/attackby(var/obj/item/A as obj, mob/user as mob)
+/obj/item/gun/launcher/syringe/attackby(obj/item/A as obj, mob/user as mob)
 	if(istype(A, /obj/item/syringe_cartridge))
 		var/obj/item/syringe_cartridge/C = A
 		if(darts.len >= max_darts)

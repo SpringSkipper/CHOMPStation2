@@ -55,7 +55,7 @@
 	attack_sound = 'sound/weapons/bite.ogg'
 	attacktext = list("bitten")
 
-	organ_names = /decl/mob_organ_names/fish
+	organ_names = /datum/decl/mob_organ_names/fish
 
 	meat_amount = 5
 	meat_type = /obj/item/reagent_containers/food/snacks/carpmeat
@@ -66,6 +66,9 @@
 
 	var/random_color = FALSE
 	var/rarechance = 1
+
+	export_research_value = TECHWEB_TIER_1_POINTS
+	export_research_diminished_max = 4
 
 	var/static/list/carp_colors = list(\
 	"lightpurple" = "#c3b9f1", \
@@ -144,7 +147,7 @@
 	else
 		add_dead_carp_overlay()
 
-/mob/living/simple_mob/animal/space/carp/apply_melee_effects(var/atom/A)
+/mob/living/simple_mob/animal/space/carp/apply_melee_effects(atom/A)
 	if(isliving(A))
 		var/mob/living/L = A
 		if(prob(knockdown_chance))
@@ -362,7 +365,7 @@
 /mob/living/simple_mob/animal/space/carp/puffer/apply_melee_effects() //it gets close enough to attack? EXPLODE
 	kaboom()
 
-/mob/living/simple_mob/animal/space/carp/puffer/adjustFireLoss(var/amount,var/include_robo) //you make it hot? EXPLODE
+/mob/living/simple_mob/animal/space/carp/puffer/adjustFireLoss(amount,include_robo) //you make it hot? EXPLODE
 	if(amount>0)
 		kaboom()
 	..()

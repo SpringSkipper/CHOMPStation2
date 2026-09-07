@@ -24,6 +24,7 @@
 	qdel(radio)
 	camera = null
 	radio = null
+	showing = null
 	. = ..()
 
 /obj/item/tvcamera/examine()
@@ -321,12 +322,6 @@
 
 /obj/item/clothing/accessory/bodycam/update_icon()
 	..()
-	if(bcamera.status)
-		icon_state = "eshield"
-		item_state = "eshield"
-	else
-		icon_state = "eshield"
-		item_state = "eshield"
 	var/mob/living/carbon/human/H = loc
 	if(istype(H))
 		H.update_inv_r_hand()
@@ -336,7 +331,7 @@
 
 //Assembly by roboticist
 
-/obj/item/robot_parts/head/attackby(var/obj/item/assembly/S, mob/user as mob)
+/obj/item/robot_parts/head/attackby(obj/item/assembly/S, mob/user as mob)
 	if(!istype(S, /obj/item/assembly/infra))
 		..()
 		return

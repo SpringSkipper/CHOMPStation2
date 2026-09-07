@@ -35,7 +35,6 @@
 	if(!isbelly(hostloc))
 		return list()
 
-	var/list/inside = list()
 	var/obj/belly/inside_belly = hostloc
 	var/mob/living/pred = inside_belly.owner
 
@@ -47,18 +46,6 @@
 
 	if(inside_desc != "No description.")
 		inside_desc = inside_belly.belly_format_string(inside_desc, owner, use_first_only = TRUE)
-
-	inside = list(
-		"absorbed" = owner.absorbed,
-		"belly_name" = inside_belly.name,
-		"belly_mode" = inside_belly.digest_mode,
-		"desc" = inside_desc,
-		"pred" = pred,
-		"ref" = "\ref[inside_belly]",
-		"liq_lvl" = inside_belly.reagents.total_volume,
-		"liq_reagent_type" = inside_belly.reagent_chosen,
-		"liuq_name" = inside_belly.reagent_name,
-	)
 
 	var/list/inside_contents = list()
 	for(var/atom/movable/O in inside_belly)
@@ -90,7 +77,20 @@
 			if(M.absorbed)
 				info["absorbed"] = TRUE
 		UNTYPED_LIST_ADD(inside_contents, info)
-	inside["contents"] = inside_contents
+
+	var/list/inside = list(
+		"absorbed" = owner.absorbed,
+		"belly_name" = inside_belly.get_belly_name(),
+		"belly_mode" = inside_belly.digest_mode,
+		"desc" = inside_desc,
+		"pred" = pred,
+		"ref" = "\ref[inside_belly]",
+		"liq_lvl" = inside_belly.reagents.total_volume,
+		"liq_reagent_type" = inside_belly.reagent_chosen,
+		"liuq_name" = inside_belly.reagent_name,
+		"contents" = inside_contents
+	)
+
 	return inside
 
 /datum/vore_look/proc/get_prey_abilities(mob/owner, obj/belly/inside_belly)
@@ -269,7 +269,7 @@
 				for(var/flag_name in selected.vore_sprite_flag_list)
 					UNTYPED_LIST_ADD(vs_flags, list("label" = flag_name, "selection" = selected.vore_sprite_flags & selected.vore_sprite_flag_list[flag_name]))
 
-				var/datum/category_group/underwear/UWC = global_underwear.categories_by_name[host.vore_selected.undergarment_chosen]
+				var/datum/category_group/underwear/UWC = GLOB.global_underwear.categories_by_name[host.vore_selected.undergarment_chosen]
 				var/list/undergarments
 				if(UWC)
 					undergarments = UWC.items
@@ -299,7 +299,7 @@
 				"belly_sprite_options" = host.vore_icon_bellies,
 				"undergarment_chosen" = selected.undergarment_chosen,
 				"undergarment_if_none" = selected.undergarment_if_none || "None",
-				"undergarment_options" = global_underwear.categories,
+				"undergarment_options" = GLOB.global_underwear.categories,
 				"undergarment_options_if_none" = undergarments,
 				"undergarment_color" = selected.undergarment_color,
 				"tail_option_shown" = ishuman(owner),

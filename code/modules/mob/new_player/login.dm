@@ -47,6 +47,7 @@
 		handle_privacy_poll()
 		client.playtitlemusic()
 		version_warnings()
+		add_verb(src, /mob/proc/insidePanel)
 
 /mob/new_player/proc/version_warnings()
 	var/problems // string to store message to present to player as a problem
@@ -75,6 +76,9 @@
 
 		if(1652 to 1654)
 			problems = "various webview graphics issues and client hanging (1652 to 1654 are all affected). 516.1651 is known to be safe from these issues if a newer version than 1654 is not available."
+
+		if(1682 to 1686)
+			problems = "versions 516.1682 through 516.1686 contain a client crash. Update to at least 516.1687."
 
 	if(problems)
 		// To get attention
